@@ -816,6 +816,71 @@
   .expedition-summary-empty{color:var(--text-faint); font-size:12px; margin:0 0 16px;}
   .expedition-modal .btn{width:100%; margin-top:6px;}
 
+  /* ---------- PLAN DE EXPEDICIÓN (duración / clima / terreno / equipo) ---------- */
+  .expedition-plan-field{margin-bottom:14px;}
+  .expedition-plan-field label{
+    display:block; font-family:'IBM Plex Mono', monospace; font-size:10.5px; text-transform:uppercase;
+    letter-spacing:.05em; color:var(--text-muted); margin-bottom:6px;
+  }
+  .expedition-plan-field select, .expedition-plan-field textarea{
+    width:100%; background:var(--surface); border:1px solid var(--border); color:var(--text);
+    padding:9px 10px; border-radius:var(--radius); font-size:13px; font-family:'Inter', sans-serif;
+  }
+  .expedition-plan-field textarea{resize:vertical; min-height:70px; line-height:1.5;}
+  .expedition-plan-cancel{margin-top:8px;}
+  .expedition-plan-cancel.btn-ghost{width:100%;}
+
+  .expedition-gear-toggle{
+    background:none; border:none; color:var(--accent-2); font-family:'IBM Plex Mono', monospace;
+    font-size:11px; text-transform:uppercase; letter-spacing:.04em; cursor:pointer; padding:0;
+    margin-top:4px; text-decoration:underline; text-underline-offset:3px;
+  }
+  .expedition-gear-list{margin-top:10px; padding-top:10px; border-top:1px solid var(--border-soft);}
+  .expedition-gear-item{
+    display:flex; align-items:center; gap:8px; padding:5px 0; font-size:12.5px; color:var(--text);
+  }
+  .expedition-gear-item small{color:var(--text-faint); font-family:'IBM Plex Mono', monospace; font-size:9.5px;}
+  .expedition-gear-item.packed{color:var(--text-faint); text-decoration:line-through;}
+  .expedition-plan-tags{display:flex; gap:6px; flex-wrap:wrap; margin:2px 0 10px;}
+  .expedition-plan-tag{
+    background:var(--bg-elevated); border:1px solid var(--border); color:var(--text-muted);
+    font-family:'IBM Plex Mono', monospace; font-size:10.5px; padding:3px 8px; border-radius:12px;
+  }
+
+  /* ---------- CIERRE DE EXPEDICIÓN (fotos + notas al volver) ---------- */
+  .expedition-close-photos{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;}
+  .expedition-close-photo{position:relative; width:64px; height:64px; border-radius:var(--radius); overflow:hidden;}
+  .expedition-close-photo img{width:100%; height:100%; object-fit:cover; display:block;}
+  .expedition-close-photo button{
+    position:absolute; top:1px; right:1px; background:rgba(6,8,6,.75); color:#fff; border:none;
+    width:18px; height:18px; line-height:1; border-radius:50%; cursor:pointer; font-size:12px;
+  }
+  .expedition-close-photo-add{
+    width:64px; height:64px; border:1px dashed var(--border); border-radius:var(--radius);
+    display:flex; align-items:center; justify-content:center; color:var(--text-faint);
+    font-size:20px; cursor:pointer; background:var(--surface);
+  }
+
+  /* ---------- HISTORIAL DE EXPEDICIONES ---------- */
+  .expedition-historial{margin:0 0 22px; max-width:620px;}
+  .expedition-historial > summary{
+    cursor:pointer; font-family:'Oswald', sans-serif; font-size:12.5px; text-transform:uppercase;
+    letter-spacing:.03em; color:var(--text-muted); padding:6px 0; list-style:none;
+  }
+  .expedition-historial > summary::-webkit-details-marker{display:none;}
+  .expedition-historial > summary::before{content:'▸ '; color:var(--accent);}
+  .expedition-historial[open] > summary::before{content:'▾ ';}
+  .expedition-historial-item{
+    background:var(--surface); border:1px solid var(--border-soft); border-radius:var(--radius);
+    padding:12px 14px; margin-top:10px;
+  }
+  .expedition-historial-item-head{display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:6px;}
+  .expedition-historial-item-head b{font-family:'Oswald', sans-serif; font-size:13px; text-transform:uppercase;}
+  .expedition-historial-item-head small{color:var(--text-faint); font-family:'IBM Plex Mono', monospace; font-size:10.5px;}
+  .expedition-historial-notas{color:var(--text-muted); font-size:12.5px; line-height:1.5; margin:4px 0 8px;}
+  .expedition-historial-fotos{display:flex; gap:6px; flex-wrap:wrap;}
+  .expedition-historial-fotos img{width:52px; height:52px; object-fit:cover; border-radius:var(--radius);}
+
   /* WELCOME / TUTORIAL MODAL */
   .welcome-modal-overlay{
     display:none; position:fixed; inset:0; z-index:80;
@@ -2032,20 +2097,147 @@ function marcarDesafioCompletado(id){
 
 /* =========================================================================
    MODO EXPEDICIÓN
-   Cronómetro de campo: se inicia antes de salir, corre en segundo plano
-   (persistido en localStorage por si se recarga la página) y al finalizar
-   muestra un resumen con tiempo, fotos subidas, XP ganada, logros
-   desbloqueados y nivel actual.
+   Cronómetro de campo: antes de salir se arma un plan (duración, clima y
+   terreno esperados) y la app arma una lista de equipo sugerida. El
+   cronómetro corre en segundo plano (persistido en localStorage por si se
+   recarga la página). Al volver se suben fotos y se anota qué se aprendió;
+   con eso se guarda la expedición en el historial y se otorgan XP, logros
+   y nivel.
 ========================================================================= */
 
 const EXPEDICION_STORAGE_KEY = 'survivalAI_expedicion_v1';
+const EXPEDICIONES_HISTORIAL_KEY = 'survivalAI_expediciones_historial_v1';
+
+/* ---------- Reglas para generar la lista de equipo sugerida ---------- */
+
+const EXPEDICION_DURACION_LABELS = {
+  medio_dia:  { label: 'Salida corta (medio día)', icon: '🕐' },
+  un_dia:     { label: '1 día completo',            icon: '☀️' },
+  fin_semana: { label: 'Fin de semana (2 días)',    icon: '🏕️' },
+  varios_dias:{ label: '3 días o más',              icon: '🎒' }
+};
+const EXPEDICION_CLIMA_LABELS = {
+  templado: { label: 'Templado', icon: '🌤️' },
+  frio:     { label: 'Frío',     icon: '🥶' },
+  calor:    { label: 'Calor',    icon: '🔥' },
+  lluvia:   { label: 'Lluvia',   icon: '🌧️' },
+  nieve:    { label: 'Nieve',    icon: '❄️' }
+};
+const EXPEDICION_TERRENO_LABELS = {
+  bosque:   { label: 'Bosque',       icon: '🌲' },
+  montana:  { label: 'Montaña',      icon: '⛰️' },
+  rio:      { label: 'Río / costa',  icon: '🏞️' },
+  desierto: { label: 'Desierto',     icon: '🏜️' }
+};
+
+const EXPEDICION_GEAR_BASE = [
+  { nombre: 'Navaja o multiherramienta', esencial: true },
+  { nombre: 'Botiquín de primeros auxilios', esencial: true },
+  { nombre: 'Linterna frontal + pilas de repuesto', esencial: true },
+  { nombre: 'Mechero o fósforos impermeables', esencial: true },
+  { nombre: 'Silbato de emergencia', esencial: true },
+  { nombre: 'Mapa y brújula', esencial: true },
+  { nombre: 'Bolsas para residuos', esencial: false }
+];
+const EXPEDICION_GEAR_DURACION = {
+  medio_dia: [
+    { nombre: 'Agua (1 a 1.5 L)', esencial: true },
+    { nombre: 'Snack o vianda liviana', esencial: true }
+  ],
+  un_dia: [
+    { nombre: 'Agua (2 L)', esencial: true },
+    { nombre: 'Comida para todo el día', esencial: true },
+    { nombre: 'Kit de fuego de respaldo', esencial: false }
+  ],
+  fin_semana: [
+    { nombre: 'Agua (2-3 L) + pastillas potabilizadoras', esencial: true },
+    { nombre: 'Comida para 2 días', esencial: true },
+    { nombre: 'Muda de ropa de recambio', esencial: true },
+    { nombre: 'Saco de dormir liviano', esencial: true },
+    { nombre: 'Carpa o refugio portátil', esencial: false }
+  ],
+  varios_dias: [
+    { nombre: 'Sistema de filtrado o potabilización de agua', esencial: true },
+    { nombre: 'Comida deshidratada para varios días', esencial: true },
+    { nombre: 'Saco de dormir para temperaturas bajas', esencial: true },
+    { nombre: 'Carpa', esencial: true },
+    { nombre: 'Ropa de recambio completa', esencial: true },
+    { nombre: 'Cocina portátil / hornillo', esencial: false }
+  ]
+};
+const EXPEDICION_GEAR_TERRENO = {
+  bosque: [
+    { nombre: 'Repelente de insectos', esencial: true },
+    { nombre: 'Cuerda (15 m)', esencial: false },
+    { nombre: 'Sierra plegable o machete pequeño', esencial: false }
+  ],
+  montana: [
+    { nombre: 'Guantes', esencial: true },
+    { nombre: 'Bastones de trekking', esencial: false },
+    { nombre: 'Gorro térmico', esencial: false },
+    { nombre: 'Cuerda y arnés básico', esencial: false }
+  ],
+  rio: [
+    { nombre: 'Calzado acuático', esencial: true },
+    { nombre: 'Bolsa estanca', esencial: true },
+    { nombre: 'Chaleco o ayuda de flotación', esencial: false }
+  ],
+  desierto: [
+    { nombre: 'Protector solar factor alto', esencial: true },
+    { nombre: 'Sombrero de ala ancha', esencial: true },
+    { nombre: 'Agua adicional (+1 L)', esencial: true }
+  ]
+};
+const EXPEDICION_GEAR_CLIMA = {
+  templado: [],
+  frio: [
+    { nombre: 'Capas térmicas', esencial: true },
+    { nombre: 'Gorro y guantes de abrigo', esencial: true },
+    { nombre: 'Campera cortaviento', esencial: false }
+  ],
+  calor: [
+    { nombre: 'Protector solar', esencial: true },
+    { nombre: 'Gorra o sombrero', esencial: true }
+  ],
+  lluvia: [
+    { nombre: 'Poncho o campera impermeable', esencial: true },
+    { nombre: 'Funda impermeable para la mochila', esencial: true },
+    { nombre: 'Bolsas herméticas para electrónica', esencial: false }
+  ],
+  nieve: [
+    { nombre: 'Polainas', esencial: true },
+    { nombre: 'Gafas de sol para nieve', esencial: true },
+    { nombre: 'Guantes térmicos impermeables', esencial: true }
+  ]
+};
+
+function generarListaEquipo(duracion, clima, terreno){
+  const bloques = [
+    EXPEDICION_GEAR_BASE,
+    EXPEDICION_GEAR_DURACION[duracion] || [],
+    EXPEDICION_GEAR_TERRENO[terreno] || [],
+    EXPEDICION_GEAR_CLIMA[clima] || []
+  ];
+  const vistos = new Set();
+  const lista = [];
+  bloques.flat().forEach(item => {
+    const clave = item.nombre.toLowerCase();
+    if(vistos.has(clave)) return;
+    vistos.add(clave);
+    lista.push({ id: 'gear-' + Date.now() + '-' + lista.length, nombre: item.nombre, esencial: item.esencial, empacado: false });
+  });
+  return lista;
+}
+
+/* ---------- Estado del cronómetro / plan activo ---------- */
 
 function crearExpedicionInicial(){
-  return { active: false, startTime: null, xpInicio: 0, fotosInicio: 0, logrosInicioIds: [] };
+  return { active: false, startTime: null, xpInicio: 0, fotosInicio: 0, logrosInicioIds: [], plan: null, listaEquipo: [] };
 }
 
 let expeditionState = crearExpedicionInicial();
 let expeditionTimerHandle = null;
+let expedicionCierreDraft = { notas: '', fotos: [] };
 
 function cargarExpedicion(){
   const guardado = leerStorage(EXPEDICION_STORAGE_KEY);
@@ -2054,6 +2246,15 @@ function cargarExpedicion(){
 
 function guardarExpedicion(){
   guardarStorage(EXPEDICION_STORAGE_KEY, expeditionState);
+}
+
+function leerHistorialExpediciones(){
+  const historial = leerStorage(EXPEDICIONES_HISTORIAL_KEY);
+  return Array.isArray(historial) ? historial : [];
+}
+
+function guardarHistorialExpediciones(historial){
+  guardarStorage(EXPEDICIONES_HISTORIAL_KEY, historial.slice(0, 50));
 }
 
 function contarFotosDesafios(){
@@ -2078,35 +2279,170 @@ function detenerTimerExpedicion(){
   if(expeditionTimerHandle){ clearInterval(expeditionTimerHandle); expeditionTimerHandle = null; }
 }
 
-function iniciarExpedicion(){
+/* ---------- Paso 1: planificar la salida y arrancar el cronómetro ---------- */
+
+function abrirPlanExpedicion(){
   if(expeditionState.active) return;
+  const overlay = document.getElementById('expeditionModalOverlay');
+  const modal = document.getElementById('expeditionModal');
+  if(!overlay || !modal) return;
+
+  modal.innerHTML = `
+    <div class="expedition-summary-head">
+      <span class="expedition-summary-icon">🧭</span>
+      <h2>Planificar expedición</h2>
+      <p>Contanos cómo va a ser la salida y armamos tu lista de equipo.</p>
+    </div>
+    <form id="expedicionPlanForm">
+      <div class="expedition-plan-field">
+        <label for="planDuracion">¿Cuánto dura la salida?</label>
+        <select id="planDuracion" name="duracion">
+          ${Object.entries(EXPEDICION_DURACION_LABELS).map(([k, v]) => `<option value="${k}">${v.icon} ${v.label}</option>`).join('')}
+        </select>
+      </div>
+      <div class="expedition-plan-field">
+        <label for="planClima">¿Qué clima esperás?</label>
+        <select id="planClima" name="clima">
+          ${Object.entries(EXPEDICION_CLIMA_LABELS).map(([k, v]) => `<option value="${k}">${v.icon} ${v.label}</option>`).join('')}
+        </select>
+      </div>
+      <div class="expedition-plan-field">
+        <label for="planTerreno">¿A qué lugar vas?</label>
+        <select id="planTerreno" name="terreno">
+          ${Object.entries(EXPEDICION_TERRENO_LABELS).map(([k, v]) => `<option value="${k}">${v.icon} ${v.label}</option>`).join('')}
+        </select>
+      </div>
+      <button class="btn" type="submit">🎒 Generar equipo y empezar</button>
+      <button class="btn btn-ghost expedition-plan-cancel" type="button" id="planCancelBtn">Cancelar</button>
+    </form>
+  `;
+  overlay.classList.add('open');
+
+  document.getElementById('planCancelBtn').addEventListener('click', cerrarResumenExpedicion);
+  document.getElementById('expedicionPlanForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const duracion = fd.get('duracion');
+    const clima = fd.get('clima');
+    const terreno = fd.get('terreno');
+    confirmarPlanYArrancar(duracion, clima, terreno);
+  });
+}
+
+function confirmarPlanYArrancar(duracion, clima, terreno){
+  const listaEquipo = generarListaEquipo(duracion, clima, terreno);
   expeditionState = {
     active: true,
     startTime: Date.now(),
     xpInicio: progressState.xp,
     fotosInicio: contarFotosDesafios(),
-    logrosInicioIds: [...progressState.logrosDesbloqueados]
+    logrosInicioIds: [...progressState.logrosDesbloqueados],
+    plan: { duracion, clima, terreno },
+    listaEquipo
   };
   guardarExpedicion();
+  cerrarResumenExpedicion();
   mostrarToast('xp', 'Expedición iniciada', 'El cronómetro empezó a correr. ¡Buena suerte ahí afuera!');
   iniciarTimerExpedicion();
   renderExpeditionBar();
   if(currentSection === 'desafios') renderDesafiosSection();
 }
 
-function finalizarExpedicion(){
+function togglePackedGear(gearId){
+  const item = expeditionState.listaEquipo.find(g => g.id === gearId);
+  if(!item) return;
+  item.empacado = !item.empacado;
+  guardarExpedicion();
+  if(currentSection === 'desafios') renderDesafiosSection();
+}
+
+/* ---------- Paso 2: al volver, subir fotos y anotar qué se aprendió ---------- */
+
+function abrirCierreExpedicion(){
+  if(!expeditionState.active) return;
+  expedicionCierreDraft = { notas: '', fotos: [] };
+  renderCierreExpedicionModal();
+}
+
+function renderCierreExpedicionModal(){
+  const overlay = document.getElementById('expeditionModalOverlay');
+  const modal = document.getElementById('expeditionModal');
+  if(!overlay || !modal) return;
+
+  const fotosHtml = expedicionCierreDraft.fotos.map((foto, i) => `
+    <div class="expedition-close-photo">
+      <img src="${foto}" alt="Foto de la expedición">
+      <button type="button" data-i="${i}" class="cierre-foto-remove">&times;</button>
+    </div>`).join('');
+
+  modal.innerHTML = `
+    <div class="expedition-summary-head">
+      <span class="expedition-summary-icon">🏕️</span>
+      <h2>¿Cómo te fue?</h2>
+      <p>Subí fotos y contá qué aprendiste antes de ver el resumen.</p>
+    </div>
+    <div class="expedition-plan-field">
+      <label>Fotos de la salida</label>
+      <div class="expedition-close-photos">
+        ${fotosHtml}
+        <label class="expedition-close-photo-add" for="cierreFotoInput">+</label>
+      </div>
+      <input type="file" accept="image/*" capture="environment" id="cierreFotoInput" class="challenge-file-input">
+    </div>
+    <div class="expedition-plan-field">
+      <label for="cierreNotas">¿Qué aprendiste en esta salida?</label>
+      <textarea id="cierreNotas" placeholder="Ej: encontré agua cerca del refugio, el fuego costó más de lo esperado...">${escapeHtml(expedicionCierreDraft.notas)}</textarea>
+    </div>
+    <button class="btn" id="cierreConfirmarBtn" type="button">✅ Finalizar y ver resumen</button>
+    <button class="btn btn-ghost expedition-plan-cancel" type="button" id="cierreCancelBtn">Todavía no, seguir en campo</button>
+  `;
+  overlay.classList.add('open');
+
+  document.getElementById('cierreCancelBtn').addEventListener('click', cerrarResumenExpedicion);
+  document.getElementById('cierreFotoInput').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if(file){
+      procesarFotoDesafio(file, dataUrl => {
+        expedicionCierreDraft.fotos.push(dataUrl);
+        renderCierreExpedicionModal();
+      });
+    }
+    e.target.value = '';
+  });
+  modal.querySelectorAll('.cierre-foto-remove').forEach(btn => {
+    btn.addEventListener('click', e => {
+      const i = Number(e.target.dataset.i);
+      expedicionCierreDraft.fotos.splice(i, 1);
+      renderCierreExpedicionModal();
+    });
+  });
+  document.getElementById('cierreConfirmarBtn').addEventListener('click', () => {
+    expedicionCierreDraft.notas = document.getElementById('cierreNotas').value;
+    finalizarExpedicionConDatos(expedicionCierreDraft.notas, expedicionCierreDraft.fotos);
+  });
+}
+
+function finalizarExpedicionConDatos(notas, fotosSalida){
   if(!expeditionState.active) return;
   const duracionMs = Date.now() - expeditionState.startTime;
-  const fotosGanadas = Math.max(0, contarFotosDesafios() - expeditionState.fotosInicio);
+  const fotosDesafiosGanadas = Math.max(0, contarFotosDesafios() - expeditionState.fotosInicio);
   const logrosInicioIds = expeditionState.logrosInicioIds;
   const xpInicio = expeditionState.xpInicio;
+  const plan = expeditionState.plan;
+  const listaEquipo = expeditionState.listaEquipo || [];
+  const notasLimpias = (notas || '').trim();
+  const equipoCompleto = listaEquipo.length > 0 && listaEquipo.every(g => g.empacado);
 
   progressState.expedicionesRealizadas = (progressState.expedicionesRealizadas || 0) + 1;
   progressState.expedicionTiempoTotalMs = (progressState.expedicionTiempoTotalMs || 0) + duracionMs;
   progressState.expedicionMasLargaMs = Math.max(progressState.expedicionMasLargaMs || 0, duracionMs);
+  if(notasLimpias) progressState.expedicionesConNotas = (progressState.expedicionesConNotas || 0) + 1;
+  if(equipoCompleto) progressState.expedicionEquipoCompleto = true;
   guardarProgreso();
 
   otorgarXP(25, 'Expedición completada');
+  if(notasLimpias) otorgarXP(10, 'Aprendizaje registrado');
+  if(fotosSalida.length) otorgarXP(Math.min(fotosSalida.length, 3) * 5, 'Fotos de la expedición');
 
   const xpGanadaTotal = Math.max(0, progressState.xp - xpInicio);
   const logrosGanados = progressState.logrosDesbloqueados
@@ -2114,6 +2450,21 @@ function finalizarExpedicion(){
     .map(id => ACHIEVEMENTS.find(a => a.id === id))
     .filter(Boolean);
   const nivelActual = calcularNivel(progressState.xp).nivel;
+  const fotosGanadas = fotosDesafiosGanadas + fotosSalida.length;
+
+  const historial = leerHistorialExpediciones();
+  historial.unshift({
+    id: 'exp-' + Date.now(),
+    fecha: new Date().toISOString(),
+    duracionMs,
+    plan,
+    listaEquipo,
+    notas: notasLimpias,
+    fotos: fotosSalida,
+    fotosGanadas,
+    xpGanadaTotal
+  });
+  guardarHistorialExpediciones(historial);
 
   detenerTimerExpedicion();
   expeditionState = crearExpedicionInicial();
@@ -2121,7 +2472,7 @@ function finalizarExpedicion(){
   renderExpeditionBar();
   if(currentSection === 'desafios') renderDesafiosSection();
 
-  mostrarResumenExpedicion({ duracionMs, fotosGanadas, xpGanadaTotal, logrosGanados, nivelActual });
+  mostrarResumenExpedicion({ duracionMs, fotosGanadas, xpGanadaTotal, logrosGanados, nivelActual, plan, notas: notasLimpias });
 }
 
 function renderExpeditionBar(){
@@ -2141,13 +2492,38 @@ function renderExpeditionBar(){
     <button class="btn btn-sm expedition-bar-btn" id="expeditionEndBtn" type="button">Finalizar expedición</button>
   `;
   const endBtn = document.getElementById('expeditionEndBtn');
-  if(endBtn) endBtn.addEventListener('click', finalizarExpedicion);
+  if(endBtn) endBtn.addEventListener('click', abrirCierreExpedicion);
+}
+
+function renderGearChecklistHtml(){
+  const lista = expeditionState.listaEquipo || [];
+  if(!lista.length) return '';
+  const empacados = lista.filter(g => g.empacado).length;
+  return `
+    <button type="button" class="expedition-gear-toggle" id="expeditionGearToggle">
+      🎒 Ver equipo sugerido (${empacados}/${lista.length} empacado)
+    </button>
+    <div class="expedition-gear-list" id="expeditionGearList" style="display:none;">
+      ${lista.map(g => `
+        <label class="expedition-gear-item${g.empacado ? ' packed' : ''}">
+          <input type="checkbox" class="expedition-gear-check" data-id="${g.id}" ${g.empacado ? 'checked' : ''}>
+          ${escapeHtml(g.nombre)} ${g.esencial ? '<small>ESENCIAL</small>' : ''}
+        </label>
+      `).join('')}
+    </div>`;
 }
 
 function renderExpeditionCard(){
   if(expeditionState.active){
     const elapsed = Date.now() - expeditionState.startTime;
     const fotosGanadas = Math.max(0, contarFotosDesafios() - expeditionState.fotosInicio);
+    const plan = expeditionState.plan;
+    const tagsHtml = plan ? `
+      <div class="expedition-plan-tags">
+        <span class="expedition-plan-tag">${EXPEDICION_DURACION_LABELS[plan.duracion]?.icon || ''} ${EXPEDICION_DURACION_LABELS[plan.duracion]?.label || ''}</span>
+        <span class="expedition-plan-tag">${EXPEDICION_CLIMA_LABELS[plan.clima]?.icon || ''} ${EXPEDICION_CLIMA_LABELS[plan.clima]?.label || ''}</span>
+        <span class="expedition-plan-tag">${EXPEDICION_TERRENO_LABELS[plan.terreno]?.icon || ''} ${EXPEDICION_TERRENO_LABELS[plan.terreno]?.label || ''}</span>
+      </div>` : '';
     return `
       <div class="expedition-card expedition-card-active">
         <div class="expedition-card-head">
@@ -2157,7 +2533,9 @@ function renderExpeditionCard(){
             <p>Cronómetro: <b>${formatDuracion(elapsed)}</b> · Fotos subidas en esta salida: <b>${fotosGanadas}</b></p>
           </div>
         </div>
-        <p class="expedition-card-desc">Elegí los desafíos de abajo, completalos en el campo y subí una foto como evidencia. Cuando vuelvas, tocá "Finalizar expedición" en la barra de arriba para ver tu resumen.</p>
+        ${tagsHtml}
+        <p class="expedition-card-desc">Elegí los desafíos de abajo, completalos en el campo y subí una foto como evidencia. Cuando vuelvas, tocá "Finalizar expedición" en la barra de arriba para subir fotos, anotar qué aprendiste y ver tu resumen.</p>
+        ${renderGearChecklistHtml()}
       </div>`;
   }
   return `
@@ -2166,12 +2544,37 @@ function renderExpeditionCard(){
         <span class="expedition-card-icon">🧭</span>
         <div>
           <h3>Modo Expedición</h3>
-          <p>Activá el cronómetro antes de salir al campo.</p>
+          <p>Planificá la salida y activá el cronómetro antes de salir al campo.</p>
         </div>
       </div>
-      <p class="expedition-card-desc">Elegí entre los desafíos de abajo, completalos en el terreno y subí fotos como evidencia. Al volver, finalizá la expedición y mirá cuánto tiempo estuviste, cuántas fotos subiste, la XP ganada y los logros desbloqueados.</p>
+      <p class="expedition-card-desc">Elegí la duración, el clima esperado y el lugar; la app arma una lista de equipo recomendada. En el campo, completá desafíos y subí fotos. Al volver, subís fotos y anotás qué aprendiste, y ganás XP por toda la salida.</p>
       <button class="btn" id="expeditionStartBtn" type="button">🚀 Iniciar expedición</button>
     </div>`;
+}
+
+function renderExpedicionesHistorialHtml(){
+  const historial = leerHistorialExpediciones();
+  if(!historial.length) return '';
+  return `
+    <details class="expedition-historial">
+      <summary>Historial de expediciones (${historial.length})</summary>
+      ${historial.slice(0, 10).map(h => {
+        const plan = h.plan;
+        const tags = plan ? `${EXPEDICION_DURACION_LABELS[plan.duracion]?.icon || ''} ${EXPEDICION_DURACION_LABELS[plan.duracion]?.label || ''} · ${EXPEDICION_CLIMA_LABELS[plan.clima]?.icon || ''} ${EXPEDICION_CLIMA_LABELS[plan.clima]?.label || ''} · ${EXPEDICION_TERRENO_LABELS[plan.terreno]?.icon || ''} ${EXPEDICION_TERRENO_LABELS[plan.terreno]?.label || ''}` : '';
+        const fotosHtml = (h.fotos || []).length
+          ? `<div class="expedition-historial-fotos">${h.fotos.map(f => `<img src="${f}" alt="Foto de expedición">`).join('')}</div>` : '';
+        return `
+        <div class="expedition-historial-item">
+          <div class="expedition-historial-item-head">
+            <b>${new Date(h.fecha).toLocaleDateString()}</b>
+            <small>⏱️ ${formatDuracion(h.duracionMs)} · 🏆 +${h.xpGanadaTotal} XP · 📸 ${h.fotosGanadas}</small>
+          </div>
+          ${tags ? `<div class="expedition-historial-notas">${escapeHtml(tags)}</div>` : ''}
+          ${h.notas ? `<p class="expedition-historial-notas">"${escapeHtml(h.notas)}"</p>` : ''}
+          ${fotosHtml}
+        </div>`;
+      }).join('')}
+    </details>`;
 }
 
 function mostrarResumenExpedicion(stats){
@@ -2186,6 +2589,10 @@ function mostrarResumenExpedicion(stats){
           <div><b>${escapeHtml(a.nombre)}</b><small>${escapeHtml(a.desc)}</small></div>
         </div>`).join('')
     : `<p class="expedition-summary-empty">No desbloqueaste logros nuevos en esta salida, pero cada expedición suma XP.</p>`;
+
+  const notaHtml = stats.notas
+    ? `<div class="expedition-summary-achievements"><h3>📔 Lo que aprendiste</h3><p class="expedition-historial-notas">"${escapeHtml(stats.notas)}"</p></div>`
+    : '';
 
   modal.innerHTML = `
     <div class="expedition-summary-head">
@@ -2203,6 +2610,7 @@ function mostrarResumenExpedicion(stats){
       <h3>🎖️ Logros desbloqueados</h3>
       ${logrosHtml}
     </div>
+    ${notaHtml}
     <button class="btn" id="expeditionSummaryCloseBtn" type="button">Cerrar</button>
   `;
   overlay.classList.add('open');
@@ -3555,6 +3963,8 @@ const ACHIEVEMENTS = [
   { id: 'expedicion_5',     categoria: 'Modo Expedición', nombre: 'Curtido de ruta',       desc: 'Completaste 5 expediciones.', icon: '🎒', xp: 55, check: s => s.expedicionesRealizadas >= 5 },
   { id: 'expedicion_10',    categoria: 'Modo Expedición', nombre: 'Nómade de campo',       desc: 'Completaste 10 expediciones.', icon: '🚶', xp: 80, check: s => s.expedicionesRealizadas >= 10 },
   { id: 'expedicion_larga', categoria: 'Modo Expedición', nombre: 'Larga jornada',         desc: 'Completaste una expedición de al menos 2 horas.', icon: '⏱️', xp: 40, check: s => s.expedicionMasLargaMs >= 2 * 60 * 60 * 1000 },
+  { id: 'expedicion_diario',   categoria: 'Modo Expedición', nombre: 'Diario de campo',     desc: 'Registraste qué aprendiste en 3 expediciones.', icon: '📔', xp: 30, check: s => s.expedicionesConNotas >= 3 },
+  { id: 'expedicion_equipada', categoria: 'Modo Expedición', nombre: 'Bien equipado',       desc: 'Terminaste una expedición con el 100% del equipo sugerido marcado como empacado.', icon: '🎒', xp: 30, check: s => s.expedicionEquipoCompleto === true },
 
   /* --- Constancia --- */
   { id: 'dias_1',  categoria: 'Constancia', nombre: 'Primera visita',   desc: 'Usaste la app por primera vez.', icon: '📅', xp: 5,  check: s => s.diasVisitados >= 1 },
@@ -3595,7 +4005,9 @@ function crearProgresoInicial(){
     logrosDesbloqueados: [],
     expedicionesRealizadas: 0,
     expedicionTiempoTotalMs: 0,
-    expedicionMasLargaMs: 0
+    expedicionMasLargaMs: 0,
+    expedicionesConNotas: 0,
+    expedicionEquipoCompleto: false
   };
 }
 
@@ -3659,7 +4071,9 @@ function construirStatsSnapshot(){
     usoBuscador: progressState.usoBuscador,
     expedicionesRealizadas: progressState.expedicionesRealizadas || 0,
     expedicionTiempoTotalMs: progressState.expedicionTiempoTotalMs || 0,
-    expedicionMasLargaMs: progressState.expedicionMasLargaMs || 0
+    expedicionMasLargaMs: progressState.expedicionMasLargaMs || 0,
+    expedicionesConNotas: progressState.expedicionesConNotas || 0,
+    expedicionEquipoCompleto: !!progressState.expedicionEquipoCompleto
   };
 }
 
@@ -3819,7 +4233,8 @@ function construirRespaldo(){
       progreso: progressState,
       desafios: desafiosState,
       clima: climaState,
-      perfil: profileState
+      perfil: profileState,
+      expediciones: leerHistorialExpediciones()
     }
   };
 }
@@ -3867,6 +4282,7 @@ function importarRespaldoDesdeTexto(texto){
   if(datos.desafios && typeof datos.desafios.progreso === 'object') guardarStorage(DESAFIOS_STORAGE_KEY, datos.desafios);
   if(datos.clima && typeof datos.clima.lat === 'number' && typeof datos.clima.lon === 'number') guardarStorage(CLIMA_STORAGE_KEY, datos.clima);
   if(datos.perfil && typeof datos.perfil.nombre === 'string') guardarStorage(PERFIL_STORAGE_KEY, datos.perfil);
+  if(Array.isArray(datos.expediciones)) guardarStorage(EXPEDICIONES_HISTORIAL_KEY, datos.expediciones);
 
   mostrarToast('level', 'Respaldo importado', 'Se restauraron tus datos guardados.');
   setTimeout(() => location.reload(), 700);
@@ -3881,8 +4297,8 @@ function importarRespaldoDesdeArchivo(file){
 }
 
 function borrarTodosLosDatos(){
-  if(!confirm('Esto borra TODO lo guardado en este dispositivo: mochila, chat con la IA, simulador, desafíos (incluidas las fotos), clima, perfil y progreso (nivel, XP y logros). Esta acción no se puede deshacer. ¿Continuar?')) return;
-  [PROGRESS_STORAGE_KEY, MOCHILA_STORAGE_KEY, CHAT_STORAGE_KEY, SIM_STORAGE_KEY, DESAFIOS_STORAGE_KEY, CLIMA_STORAGE_KEY, PERFIL_STORAGE_KEY].forEach(key => {
+  if(!confirm('Esto borra TODO lo guardado en este dispositivo: mochila, chat con la IA, simulador, desafíos (incluidas las fotos), expediciones (incluidas fotos y notas), clima, perfil y progreso (nivel, XP y logros). Esta acción no se puede deshacer. ¿Continuar?')) return;
+  [PROGRESS_STORAGE_KEY, MOCHILA_STORAGE_KEY, CHAT_STORAGE_KEY, SIM_STORAGE_KEY, DESAFIOS_STORAGE_KEY, CLIMA_STORAGE_KEY, PERFIL_STORAGE_KEY, EXPEDICIONES_HISTORIAL_KEY].forEach(key => {
     try{ localStorage.removeItem(key); }catch(e){ /* almacenamiento no disponible */ }
   });
   location.reload();
@@ -3902,6 +4318,7 @@ function renderDesafiosSection(){
   const content = document.getElementById('content');
   content.innerHTML = `
     ${renderExpeditionCard()}
+    ${renderExpedicionesHistorialHtml()}
     <div class="challenges-summary">
       <div class="challenges-summary-text"><b>${completados}</b> / ${CHALLENGES.length} desafíos completados</div>
       <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
@@ -3912,7 +4329,18 @@ function renderDesafiosSection(){
   `;
 
   const expeditionStartBtn = document.getElementById('expeditionStartBtn');
-  if(expeditionStartBtn) expeditionStartBtn.addEventListener('click', iniciarExpedicion);
+  if(expeditionStartBtn) expeditionStartBtn.addEventListener('click', abrirPlanExpedicion);
+
+  const gearToggle = document.getElementById('expeditionGearToggle');
+  const gearList = document.getElementById('expeditionGearList');
+  if(gearToggle && gearList){
+    gearToggle.addEventListener('click', () => {
+      gearList.style.display = gearList.style.display === 'none' ? 'block' : 'none';
+    });
+  }
+  document.querySelectorAll('.expedition-gear-check').forEach(cb => {
+    cb.addEventListener('change', e => togglePackedGear(e.target.dataset.id));
+  });
 
   CHALLENGES.forEach(c => {
     const fileInput = document.getElementById(`foto-input-${c.id}`);

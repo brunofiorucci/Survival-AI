@@ -4,7 +4,7 @@
    subí también un CACHE_NAME nuevo (ej. 'v2') para forzar la
    actualización del caché en los dispositivos de los usuarios. */
 
-const CACHE_NAME = 'survivalai-v1';
+const CACHE_NAME = 'survivalai-v2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
