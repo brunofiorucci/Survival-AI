@@ -9,11 +9,16 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="SurvivalAI">
-<link rel="icon" href="icon-192.png" type="image/png">
-<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="favicon-16x16.png" type="image/png" sizes="16x16">
+<link rel="icon" href="favicon-32x32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
   :root{
     --bg: #0a0d0b;
@@ -531,6 +536,94 @@
   .clima-advice li{margin-bottom:4px;}
   .clima-meta{font-family:'IBM Plex Mono', monospace; font-size:10.5px; color:var(--text-faint); margin-top:14px;}
 
+  /* GPS / brújula / mapa offline */
+  .gps-actions{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px;}
+  .gps-alert{
+    background:var(--danger-bg); color:var(--danger); border:1px solid transparent;
+    border-radius:var(--radius); padding:10px 14px; font-size:13px; margin-bottom:16px;
+  }
+  .gps-note{
+    background:var(--warn-bg); color:var(--warn); border-radius:var(--radius);
+    padding:10px 14px; font-size:12.5px; margin-bottom:16px; line-height:1.5;
+  }
+  .gps-columns{display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:16px; align-items:start;}
+  .gps-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:18px;
+  }
+  .gps-card h3{
+    font-family:'Oswald', sans-serif; font-size:14px; letter-spacing:.04em; text-transform:uppercase;
+    margin:0 0 14px; color:var(--text-muted);
+  }
+  .gps-coords-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(110px,1fr)); gap:12px; margin-bottom:10px;}
+  .gps-stat{background:var(--bg-elevated); border:1px solid var(--border-soft); border-radius:var(--radius); padding:10px 12px;}
+  .gps-stat-value{font-family:'IBM Plex Mono', monospace; font-size:15px; color:var(--text); word-break:break-all;}
+  .gps-stat-label{font-size:10px; color:var(--text-faint); text-transform:uppercase; letter-spacing:.05em; margin-top:4px;}
+  .gps-meta{font-family:'IBM Plex Mono', monospace; font-size:10.5px; color:var(--text-faint); margin-top:10px;}
+
+  .compass-wrap{display:flex; align-items:center; gap:18px;}
+  .compass-dial{
+    width:96px; height:96px; border-radius:50%; flex-shrink:0; position:relative;
+    background:var(--bg-elevated); border:1px solid var(--border);
+  }
+  .compass-dial::before, .compass-dial::after{
+    content:''; position:absolute; font-family:'IBM Plex Mono', monospace;
+  }
+  .compass-label{
+    position:absolute; font-family:'IBM Plex Mono', monospace; font-size:9px; color:var(--text-faint);
+  }
+  .compass-label.n{top:5px; left:50%; transform:translateX(-50%); color:var(--accent);}
+  .compass-label.s{bottom:5px; left:50%; transform:translateX(-50%);}
+  .compass-label.e{right:6px; top:50%; transform:translateY(-50%);}
+  .compass-label.w{left:6px; top:50%; transform:translateY(-50%);}
+  .compass-needle{
+    position:absolute; left:50%; top:50%; width:3px; height:38px;
+    background:linear-gradient(var(--accent) 0%, var(--accent) 50%, var(--text-faint) 50%, var(--text-faint) 100%);
+    transform-origin:50% 100%;
+    transform:translate(-50%,-100%) rotate(0deg);
+    border-radius:2px;
+    transition:transform .15s linear;
+  }
+  .compass-center{position:absolute; left:50%; top:50%; width:8px; height:8px; border-radius:50%; background:var(--text); transform:translate(-50%,-50%);}
+  .compass-info b{font-family:'Oswald', sans-serif; font-size:24px; display:block;}
+  .compass-info span{font-size:12.5px; color:var(--text-muted);}
+  .compass-permission{margin-top:10px;}
+
+  .gps-map-card{padding:0; overflow:hidden;}
+  .gps-map-card .gps-map-inner-pad{padding:18px 18px 0;}
+  #gpsMap{width:100%; height:280px; background:var(--bg-elevated); margin-top:12px;}
+  .gps-map-actions{display:flex; gap:10px; flex-wrap:wrap; align-items:center; padding:14px 18px 18px;}
+  .gps-download-progress{
+    flex:1; min-width:160px; height:8px; background:var(--bg-elevated); border:1px solid var(--border-soft);
+    border-radius:4px; overflow:hidden; position:relative;
+  }
+  .gps-download-progress-bar{height:100%; background:var(--accent); width:0%; transition:width .2s ease;}
+  .gps-download-status{font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--text-muted);}
+  .gps-map-fallback{
+    padding:30px 20px; text-align:center; color:var(--text-faint); font-family:'IBM Plex Mono', monospace;
+    font-size:12px; border-top:1px solid var(--border-soft); margin-top:12px;
+  }
+
+  .gps-waypoint-form{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px;}
+  .gps-waypoint-form input{
+    background:var(--bg-elevated); border:1px solid var(--border); color:var(--text);
+    padding:9px 12px; border-radius:var(--radius); font-size:13px; font-family:'Inter', sans-serif; flex:1; min-width:160px;
+  }
+  .gps-waypoint-form input:focus{outline:2px solid var(--accent); outline-offset:1px;}
+  .gps-waypoint-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px;}
+  .gps-waypoint-item{
+    display:flex; align-items:center; gap:10px; background:var(--bg-elevated); border:1px solid var(--border-soft);
+    border-radius:var(--radius); padding:9px 12px;
+  }
+  .gps-waypoint-item .wp-name{font-size:13px; font-weight:500; flex:1; min-width:0;}
+  .gps-waypoint-item .wp-coords{font-family:'IBM Plex Mono', monospace; font-size:10.5px; color:var(--text-faint); white-space:nowrap;}
+  .gps-waypoint-item button{
+    background:none; border:1px solid var(--border); color:var(--text-muted); border-radius:var(--radius);
+    padding:4px 8px; font-size:11px; cursor:pointer; flex-shrink:0;
+  }
+  .gps-waypoint-item button:hover{color:var(--text); border-color:var(--accent-dim);}
+  .gps-waypoint-item button.wp-del:hover{color:var(--danger); border-color:var(--danger);}
+
   /* SIMULADOR CON DECISIONES */
   .sim-intro-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(260px,1fr)); gap:16px;}
   .sim-scenario-card{
@@ -924,6 +1017,77 @@
   }
   .welcome-modal-check input{accent-color:var(--accent);}
   .welcome-modal .btn{width:100%;}
+
+  /* ---------- BOTÓN Y PANEL DE EMERGENCIA ---------- */
+  .sos-button{
+    position:fixed; right:16px; bottom:16px; z-index:900;
+    display:flex; align-items:center; justify-content:center;
+    width:44px; height:44px;
+    background:var(--bg-elevated); color:var(--danger); border:1.5px solid var(--danger);
+    border-radius:50%;
+    cursor:pointer; box-shadow:0 2px 10px rgba(0,0,0,.4);
+    opacity:.72;
+    animation:sosBreathe 4.5s ease-in-out infinite;
+    transition:opacity .15s, transform .15s, background .15s;
+  }
+  .sos-button:hover{opacity:1; background:var(--danger-bg); transform:scale(1.06);}
+  .sos-button svg{width:19px; height:19px; flex-shrink:0;}
+  @keyframes sosBreathe{
+    0%,100%{opacity:.72;}
+    50%{opacity:.95;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .sos-button{animation:none;}
+  }
+  @media (max-width:480px){
+    .sos-button{right:12px; bottom:12px; width:40px; height:40px;}
+    .sos-button svg{width:17px; height:17px;}
+  }
+
+  .sos-overlay{
+    display:none; position:fixed; inset:0; z-index:950;
+    background:rgba(6,8,6,.78); backdrop-filter:blur(2px);
+    align-items:center; justify-content:center; padding:16px;
+  }
+  .sos-overlay.open{display:flex;}
+  .sos-modal{
+    background:var(--bg-elevated); border:1px solid var(--danger);
+    border-radius:var(--radius); max-width:520px; width:100%;
+    max-height:88vh; overflow-y:auto; padding:22px 20px 20px;
+  }
+  .sos-modal-head{display:flex; align-items:center; gap:10px; margin-bottom:4px;}
+  .sos-modal-head h2{
+    font-family:'Oswald', sans-serif; font-size:19px; text-transform:uppercase;
+    letter-spacing:.02em; margin:0; flex:1; color:var(--text);
+  }
+  .sos-modal-eyebrow{
+    display:none;
+  }
+  .sos-back, .sos-close{
+    background:var(--surface); border:1px solid var(--border); color:var(--text-muted);
+    width:30px; height:30px; border-radius:50%; cursor:pointer; font-size:14px;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .sos-back:hover, .sos-close:hover{color:var(--text); border-color:var(--danger);}
+  .sos-modal-sub{color:var(--text-muted); font-size:12.5px; margin:2px 0 16px;}
+
+  .sos-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  @media (max-width:400px){.sos-grid{grid-template-columns:1fr;}}
+  .sos-topic-btn{
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:20px 10px; cursor:pointer; text-align:center;
+    transition:border-color .15s, transform .15s;
+  }
+  .sos-topic-btn:hover{border-color:var(--danger); transform:translateY(-2px);}
+  .sos-topic-icon{font-size:26px; line-height:1;}
+  .sos-topic-label{
+    font-family:'Oswald', sans-serif; font-size:12.5px; text-transform:uppercase;
+    letter-spacing:.02em; color:var(--text);
+  }
+  .sos-detail-grid{display:flex; flex-direction:column; gap:12px; margin-top:14px;}
+  .sos-detail-grid .card{clip-path:none;}
+  .sos-detail-grid .card::before{display:none;}
 </style>
 </head>
 <body>
@@ -934,6 +1098,15 @@
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
 </button>
 <div class="overlay" id="overlay"></div>
+
+<button class="sos-button" id="sosButton" aria-label="Emergencia: acceso rápido a primeros auxilios, pedir ayuda, agua, señales y qué hacer si estás perdido">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+    <path d="M12 6v12M6 12h12"/>
+  </svg>
+</button>
+<div class="sos-overlay" id="sosOverlay">
+  <div class="sos-modal" id="sosModal"></div>
+</div>
 
 <div id="app">
   <aside class="sidebar" id="sidebar">
@@ -1071,13 +1244,17 @@ const ICONS = {
   nudos: '<path d="M7 17 a4 4 0 1 1 5-5 a4 4 0 1 1 5 5 a4 4 0 1 1 -5 5 a4 4 0 1 1 -5-5 Z" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/>',
   'señales': '<path d="M5 21 V4 M5 4 H18 L14.5 8.5 L18 13 H5" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round" stroke-linecap="round"/>',
   comida: '<path d="M20 12 C20 12 15 5 9 5 C5 5 3 8.5 3 12 C3 15.5 5 19 9 19 C15 19 20 12 20 12 Z" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/><circle cx="16" cy="12" r="1" fill="currentColor"/><path d="M3 12 H1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+  pesca: '<path d="M2 12 C6 12 8 6 14 6 C19 6 22 9 22 12 C22 15 19 18 14 18 C8 18 6 12 2 12 Z" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/><circle cx="15.5" cy="11" r="1" fill="currentColor"/><path d="M2 12 L5 9 M2 12 L5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>',
+  caza: '<circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="12" cy="12" r="4.5" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="12" cy="12" r="1" fill="currentColor"/><path d="M12 1 V5 M12 19 V23 M1 12 H5 M19 12 H23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+  recoleccion: '<path d="M4 10 H20 L18 20 A2 2 0 0 1 16 22 H8 A2 2 0 0 1 6 20 Z" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/><path d="M4 10 C4 10 6 3 12 3 C18 3 20 10 20 10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M8 10 V14 M12 10 V15 M16 10 V14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>',
   mochila: '<path d="M7 8 V6 a5 5 0 0 1 10 0 v2 M5 8 H19 L20 21 H4 Z" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/>',
   ia: '<circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2" fill="none"/><path d="M12 3 V6 M12 18 V21 M3 12 H6 M18 12 H21 M5.6 5.6 L7.8 7.8 M16.2 16.2 L18.4 18.4 M18.4 5.6 L16.2 7.8 M7.8 16.2 L5.6 18.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
   simulador: '<circle cx="6" cy="6" r="2.2" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="6" cy="18" r="2.2" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="18" cy="12" r="2.2" stroke="currentColor" stroke-width="2" fill="none"/><path d="M8 7 L16 11 M8 17 L16 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
   desafios: '<circle cx="12" cy="14" r="6" stroke="currentColor" stroke-width="2" fill="none"/><path d="M9 8.5 L6 3 M15 8.5 L18 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 11 L13.2 14.8 H10.8 Z" fill="currentColor"/>',
   estadisticas: '<path d="M4 20 V4 M4 20 H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><rect x="7" y="12" width="3" height="8" fill="currentColor"/><rect x="12.5" y="7" width="3" height="13" fill="currentColor"/><rect x="18" y="10" width="0" height="0"/><path d="M8.5 12 L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
   clima: '<path d="M7 17 a4.2 4.2 0 0 1 .5-8.37 A5.5 5.5 0 0 1 17.9 9.5 A4.3 4.3 0 0 1 17.3 17 Z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 20 L8.5 21.6 M12 20 L12 22 M15.5 20 L15.5 21.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
-  perfil: '<circle cx="12" cy="8.2" r="3.4" stroke="currentColor" stroke-width="2" fill="none"/><path d="M4.8 20 C4.8 15.6 8 13 12 13 S19.2 15.6 19.2 20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>'
+  perfil: '<circle cx="12" cy="8.2" r="3.4" stroke="currentColor" stroke-width="2" fill="none"/><path d="M4.8 20 C4.8 15.6 8 13 12 13 S19.2 15.6 19.2 20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>',
+  gps: '<path d="M12 21 C12 21 19 14.5 19 9.5 A7 7 0 0 0 5 9.5 C5 14.5 12 21 12 21 Z" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/><circle cx="12" cy="9.5" r="2.4" stroke="currentColor" stroke-width="2" fill="none"/>'
 };
 
 const DATA = {
@@ -1886,6 +2063,254 @@ const DATA = {
         ]
       }
     ]
+  },
+
+  pesca: {
+    titulo: 'Pesca de supervivencia',
+    eyebrow: 'MÓDULO 11 — PESCA',
+    descripcion: 'Cómo leer el agua, armar aparejos y trampas de pesca, y aprovechar la captura sin desperdiciar nada.',
+    items: [
+      {
+        id: 'pesca-leer-agua',
+        nombre: 'Dónde buscar peces',
+        resumen: 'Leer el agua antes de tirar la línea multiplica tus chances de captura.',
+        nivel: 'bajo',
+        etiquetas: ['lectura de agua', 'estrategia', 'ríos y lagos'],
+        pasos: [
+          'Buscá zonas de sombra, remansos detrás de rocas y pozones profundos: los peces se refugian ahí del calor y la corriente fuerte.',
+          'La unión entre agua rápida y agua calma (donde la corriente "frena") suele concentrar peces esperando comida que arrastra la corriente.',
+          'Al amanecer y al atardecer los peces suelen estar más activos y cerca de la superficie; el mediodía con sol fuerte conviene pescar más profundo.',
+          'Fijate si hay insectos rozando la superficie o pequeños saltos: son señales directas de actividad de peces cerca.',
+          'En agua salada, buscá cerca de rompientes, muelles, rocas o desembocaduras de arroyos, donde se junta comida.'
+        ]
+      },
+      {
+        id: 'pesca-aparejo-improvisado',
+        nombre: 'Aparejo de línea improvisado',
+        resumen: 'Con un hilo, un anzuelo improvisado y algo de paciencia alcanza para armar un aparejo funcional.',
+        nivel: 'bajo',
+        etiquetas: ['aparejo', 'materiales sueltos', 'anzuelo'],
+        pasos: [
+          'Conseguí hilo resistente: cordino fino, hilo dental, hilo de coser del botiquín, o hebras deshilachadas de una soga.',
+          'Armá un anzuelo doblando en forma de gancho un alfiler, un clip, una espina dura, un hueso pequeño afilado o una tapita de lata cortada.',
+          'Usá como carnada lombrices, larvas, saltamontes, o trocitos brillantes de lata o plástico que imiten un pez pequeño.',
+          'Agregá una piedra chica como plomada, unos centímetros arriba del anzuelo, para que la línea baje y no flote.',
+          'Si no tenés caña, atá la línea directo a una rama flexible clavada en la orilla: el movimiento del agua "trabaja" sola mientras hacés otra tarea.'
+        ]
+      },
+      {
+        id: 'pesca-trotline',
+        nombre: 'Línea de mano múltiple (trotline)',
+        resumen: 'Una línea larga con varios anzuelos que trabaja de forma pasiva mientras atendés otras necesidades.',
+        nivel: 'medio',
+        etiquetas: ['pasiva', 'varios anzuelos', 'rendimiento'],
+        pasos: [
+          'Armá una línea principal larga y resistente, atada firme entre dos puntos fijos a cada lado del río o cruzando un brazo del agua.',
+          'Colgá de la línea principal varios hilos cortos ("bajadas") cada 50-80 cm, cada uno con su propio anzuelo y carnada.',
+          'Ubicala en una zona con corriente moderada y profundidad suficiente, evitando que quede enredada con ramas o piedras.',
+          'Revisala al menos dos veces al día: dejar peces enganchados demasiado tiempo atrae otros depredadores y arruina la carne.',
+          'En muchas áreas protegidas este método está prohibido salvo emergencia real de supervivencia: usalo solo si la situación lo amerita.'
+        ]
+      },
+      {
+        id: 'pesca-corral-piedras',
+        nombre: 'Trampa de corral con piedras (fish weir)',
+        resumen: 'Estructura pasiva que dirige y encierra peces en aguas poco profundas, sin necesidad de anzuelo.',
+        nivel: 'medio',
+        etiquetas: ['trampa pasiva', 'aguas bajas', 'sin anzuelo'],
+        pasos: [
+          'Elegí un tramo de río angosto y poco profundo, con buen flujo de peces pequeños.',
+          'Apilá piedras o ramas formando una V con la punta apuntando río abajo, dejando una abertura angosta en el vértice.',
+          'En la abertura, armá una cámara final donde los peces queden atrapados al entrar con la corriente y no puedan volver a salir.',
+          'Cerrá bien los costados para que no queden huecos por donde los peces se escapen nadando de costado.',
+          'Revisala con frecuencia y sacá los peces atrapados a mano o con una red improvisada de tela.'
+        ]
+      },
+      {
+        id: 'pesca-limpieza-pescado',
+        nombre: 'Limpieza básica del pescado',
+        resumen: 'Procesar la captura rápido y bien evita desperdicio y reduce el riesgo de intoxicación.',
+        nivel: 'medio',
+        etiquetas: ['procesado', 'higiene', 'aprovechamiento'],
+        pasos: [
+          'Sacrificá al pez rápido y sin sufrimiento con un golpe seco en la cabeza apenas lo saques del agua.',
+          'Hacé un corte desde el ano hasta la cabeza por la panza, y retirá las vísceras con cuidado de no reventar los intestinos.',
+          'Raspá las escamas de cola a cabeza con el filo de un cuchillo o el borde de una tapita, si vas a cocinarlo con piel.',
+          'Enjuagá bien la cavidad interna con agua limpia y cociná el pescado lo antes posible; en climas cálidos se descompone rápido.',
+          'Si no lo vas a comer enseguida, aplicá ahumado o secado en tiras finas para conservarlo más tiempo.'
+        ]
+      }
+    ]
+  },
+
+  caza: {
+    titulo: 'Caza y trampeo',
+    eyebrow: 'MÓDULO 12 — CAZA',
+    descripcion: 'Rastreo, trampas y armas improvisadas para conseguir proteína animal cuando la situación se extiende. La caza real conlleva responsabilidades legales y éticas: usá estas técnicas solo en una emergencia genuina de supervivencia.',
+    items: [
+      {
+        id: 'caza-legalidad-etica',
+        nombre: 'Legalidad y ética antes de cazar',
+        resumen: 'Cazar o poner trampas fuera de una emergencia real puede ser ilegal y dañar especies protegidas.',
+        nivel: 'medio',
+        etiquetas: ['legal', 'ética', 'leer primero'],
+        pasos: [
+          'En la mayoría de los países, cazar y poner trampas sin permiso está prohibido, especialmente en parques nacionales y áreas protegidas.',
+          'Reservá estas técnicas para una emergencia de supervivencia real, no para practicar en zonas donde no está permitido.',
+          'Evitá siempre especies protegidas o en peligro; si no reconocés al animal, mejor no interactuar con él.',
+          'Priorizá métodos pasivos (trampas) sobre la persecución activa: gastan menos energía y agua, tu recurso más limitado.',
+          'Aprovechá el animal completo (carne, piel, tendones, huesos) para minimizar el impacto de cada captura.'
+        ]
+      },
+      {
+        id: 'caza-rastreo-huellas',
+        nombre: 'Rastreo básico de huellas y señales',
+        resumen: 'Leer huellas, excrementos y senderos te dice qué animales hay cerca y dónde ubicar trampas.',
+        nivel: 'medio',
+        etiquetas: ['rastreo', 'observación', 'huellas'],
+        pasos: [
+          'Buscá senderos angostos de pasto aplastado o tierra compactada: suelen ser rutas habituales de animales pequeños o medianos.',
+          'Fijate en huellas cerca de fuentes de agua o barro blando, donde quedan más marcadas y fáciles de identificar.',
+          'Excrementos frescos (húmedos, con olor fuerte) indican actividad reciente en la zona; secos y descoloridos indican que pasó tiempo.',
+          'Marcas de mordisco en corteza, ramas rotas a baja altura, o madrigueras con entrada visible también delatan presencia animal.',
+          'Ubicá tus trampas sobre estos senderos activos, no en cualquier lugar al azar: la efectividad depende de la ubicación.'
+        ]
+      },
+      {
+        id: 'caza-trampa-deadfall',
+        nombre: 'Trampa de caída (Paiute deadfall)',
+        resumen: 'Trampa pasiva clásica que usa el peso de una piedra o tronco para inmovilizar al animal.',
+        nivel: 'medio',
+        etiquetas: ['trampa pasiva', 'requiere paciencia', 'pequeña fauna'],
+        pasos: [
+          'Conseguí una piedra plana y pesada, o un tronco grueso, como elemento de caída.',
+          'Armá un disparador simple con dos o tres palitos tallados en punta que se sostengan en equilibrio inestable bajo el peso.',
+          'Colocá la carnada en el disparador, de forma que al tocarla el animal derrumbe el soporte y la piedra caiga sobre él.',
+          'Ubicala sobre un sendero activo identificado por rastreo, y camuflala con hojas o tierra para que parezca natural.',
+          'Revisala con regularidad; una trampa sin revisar por mucho tiempo atrae carroñeros y pierde efectividad.'
+        ]
+      },
+      {
+        id: 'caza-lazo-camino',
+        nombre: 'Lazo (snare) en sendero de fauna',
+        resumen: 'Trampa de lazo corredizo ubicada en el camino habitual de un animal pequeño.',
+        nivel: 'medio',
+        etiquetas: ['trampa pasiva', 'cordino o alambre', 'pequeña fauna'],
+        pasos: [
+          'Armá un lazo corredizo con alambre fino o cordino, del diámetro aproximado de la cabeza del animal que buscás.',
+          'Ubicalo en un sendero angosto identificado por rastreo, a la altura de la cabeza del animal (unos 10-15 cm del suelo para presas pequeñas).',
+          'Fijá el otro extremo a una rama flexible tensada ("resorte"), para que el lazo se ajuste y levante al animal apenas tironee.',
+          'Armá varias trampas en distintos senderos en vez de una sola: multiplica tus chances con el mismo esfuerzo.',
+          'Revisalas al menos dos veces al día por razones tanto prácticas (carroñeros) como éticas (reducir el sufrimiento del animal).'
+        ]
+      },
+      {
+        id: 'caza-arma-improvisada',
+        nombre: 'Honda y lanza improvisadas',
+        resumen: 'Armas simples de corto alcance, útiles para animales pequeños o para complementar las trampas.',
+        nivel: 'medio',
+        etiquetas: ['arma improvisada', 'corto alcance', 'práctica requerida'],
+        pasos: [
+          'Para una honda, usá una tira elástica o de cuero con un cuenco central para la piedra, sujeta entre dos cordones.',
+          'Practicá la puntería en un objetivo fijo antes de intentar usarla con un animal: sin práctica previa es poco efectiva.',
+          'Para una lanza, tallá la punta de una rama recta y resistente en forma de bisel, y endurecila pasándola brevemente cerca de las brasas (sin quemarla).',
+          'Usá la lanza para animales lentos o acorralados en agua poco profunda, nunca para animales grandes o peligrosos.',
+          'Recordá que estas armas tienen alcance y precisión limitados: las trampas pasivas suelen ser mucho más eficientes en energía.'
+        ]
+      },
+      {
+        id: 'caza-procesado-presa',
+        nombre: 'Procesado básico de la presa',
+        resumen: 'Desollar y despiezar rápido evita que la carne se eche a perder y aprovecha al máximo el animal.',
+        nivel: 'medio',
+        etiquetas: ['procesado', 'higiene', 'aprovechamiento'],
+        pasos: [
+          'Sacrificá al animal rápido y de forma segura para minimizar su sufrimiento, apenas quede atrapado en la trampa.',
+          'Colgalo boca abajo si es posible y hacé un corte desde el ano hasta el cuello para retirar las vísceras con cuidado.',
+          'Separá la piel del cuerpo con cortes cortos y controlados, tirando con firmeza en vez de cortar profundo cerca del músculo.',
+          'Lavá bien la carne con agua limpia y cociná o ahumá lo antes posible: sin refrigeración se descompone rápido, sobre todo en climas cálidos.',
+          'Guardá también piel, tendones y huesos: pueden servir para cordino, agujas, herramientas o caldo nutritivo.'
+        ]
+      }
+    ]
+  },
+
+  recoleccion: {
+    titulo: 'Recolección silvestre',
+    eyebrow: 'MÓDULO 13 — RECOLECCIÓN',
+    descripcion: 'Cómo buscar y evaluar alimento silvestre de forma segura: frutos, hongos, mariscos y el protocolo para probar algo desconocido.',
+    items: [
+      {
+        id: 'recoleccion-test-comestibilidad',
+        nombre: 'Test universal de comestibilidad',
+        resumen: 'Protocolo por pasos para evaluar si una planta desconocida es segura de comer, usado solo como último recurso.',
+        nivel: 'alto',
+        etiquetas: ['protocolo', 'último recurso', 'requiere tiempo'],
+        pasos: [
+          'Usalo solo si no podés identificar la planta con certeza por otros medios y tenés horas disponibles: el proceso completo lleva casi un día entero.',
+          'Primero, frotá una parte de la planta en tu piel (muñeca o codo) y esperá 15 minutos: si hay ardor, sarpullido o irritación, descartala.',
+          'Si pasa esa prueba, tocá la planta con el labio unos minutos y luego con la lengua, esperando reacciones entre cada paso.',
+          'Si no hay reacción, masticá una porción pequeña sin tragar durante varios minutos, escupila y esperá otras 8 horas sin comer nada más.',
+          'Recién si todo lo anterior fue negativo, comé una porción pequeña y esperá otras 8 horas antes de considerar la planta segura y comer más.',
+          'Nunca pruebes este test con hongos: para hongos, la única regla segura es no comer ninguno sin identificación experta certera.'
+        ]
+      },
+      {
+        id: 'recoleccion-hongos-advertencia',
+        nombre: 'Hongos silvestres: la regla del no',
+        resumen: 'Los hongos son la categoría de mayor riesgo de recolección: muchas especies tóxicas se parecen a comestibles.',
+        nivel: 'alto',
+        etiquetas: ['hongos', 'tóxicos', 'evitar'],
+        pasos: [
+          'La regla más segura en un contexto de supervivencia es simple: no comas ningún hongo silvestre que no puedas identificar con total certeza.',
+          'Ni el color, ni el olor, ni pruebas caseras (como reaccionar con plata o cebolla) sirven para distinguir hongos comestibles de tóxicos: son mitos peligrosos.',
+          'Algunas especies mortales, como la Amanita phalloides, no producen síntomas hasta muchas horas después, cuando el daño al hígado ya es grave.',
+          'Si alguien comió un hongo desconocido y presenta náuseas, vómitos o dolor abdominal, es una emergencia médica: buscá ayuda de inmediato y llevá una muestra del hongo si es posible.'
+        ]
+      },
+      {
+        id: 'recoleccion-frutos-silvestres',
+        nombre: 'Frutos y bayas silvestres',
+        resumen: 'Reglas generales para evaluar frutos desconocidos y evitar los más peligrosos.',
+        nivel: 'medio',
+        etiquetas: ['frutos', 'bayas', 'reglas generales'],
+        pasos: [
+          'Como regla general, las bayas que crecen en racimo y son azules, moradas o negras tienen más chances de ser comestibles que las rojas o blancas, aunque no es una garantía.',
+          'Desconfiá siempre de bayas blancas o amarillas, y de cualquier fruto con olor a almendra amarga: son señales de alerta comunes de toxicidad.',
+          'Si el fruto crece de una planta con látex lechoso al partirla, o con espinas y hojas de tres en tres, extremá la precaución.',
+          'Cuando reconozcas con certeza una especie comestible común (moras, arándanos silvestres, rosa mosqueta), priorizala por sobre frutos desconocidos.',
+          'Ante la duda real, aplicá el test universal de comestibilidad antes de comer una cantidad significativa de cualquier fruto que no reconozcas.'
+        ]
+      },
+      {
+        id: 'recoleccion-mariscos-costa',
+        nombre: 'Mariscos y moluscos de costa',
+        resumen: 'Fuente de proteína accesible en zonas costeras, con algunas precauciones específicas.',
+        nivel: 'medio',
+        etiquetas: ['costa', 'mariscos', 'proteína'],
+        pasos: [
+          'Buscá mejillones, caracoles de mar y almejas adheridos a rocas en la zona entre mareas, sobre todo con marea baja.',
+          'Descartá cualquier molusco con la valva abierta que no se cierre al tocarlo: indica que ya está muerto y no es seguro comerlo.',
+          'Evitá recolectar en zonas con "marea roja" (agua de color rojizo o marrón) o carteles de restricción sanitaria: los mariscos pueden acumular toxinas peligrosas.',
+          'Cociná siempre los mariscos bien (hervidos hasta que la valva se abra bien) antes de comerlos, nunca crudos en un contexto de supervivencia.',
+          'Cangrejos y otros crustáceos pequeños atrapados en pozas de marea también son una buena fuente de proteína y se cocinan de la misma forma.'
+        ]
+      },
+      {
+        id: 'recoleccion-planificacion',
+        nombre: 'Planificar la recolección',
+        resumen: 'Buscar comida de forma organizada ahorra energía y aumenta las chances de encontrar algo útil.',
+        nivel: 'bajo',
+        etiquetas: ['estrategia', 'gestión de energía'],
+        pasos: [
+          'Combiná la recolección con otras tareas necesarias (buscar agua o leña) en vez de salir exclusivamente a recolectar.',
+          'Priorizá bordes de bosque, claros y orillas de agua: suelen tener mayor diversidad y densidad de plantas comestibles que el bosque cerrado.',
+          'Llevá siempre algo para transportar lo recolectado (bolsa, tela, o la parte de abajo de tu remera atada) para aprovechar cada salida al máximo.',
+          'Marcá mentalmente o con señales físicas los lugares donde encontraste comida identificada con certeza, para volver más rápido la próxima vez.',
+          'Si tu situación se extiende varios días, recolectá siempre un poco más de lo que necesitás hoy y aplicá secado o conservación para tener reserva.'
+        ]
+      }
+    ]
   }
 };
 
@@ -2002,7 +2427,9 @@ const CHALLENGES = [
   { id: 'noche_campamento',   nombre: 'Pasar una noche de campamento',     icon: '🌙', dificultad: 'extremo', descripcion: 'Pasá una noche completa acampando, poniendo en práctica lo aprendido sobre refugio, fuego y abrigo.' },
   { id: 'ruta_orientacion',   nombre: 'Completar una ruta de orientación', icon: '🧭', dificultad: 'extremo', descripcion: 'Planificá y completá una ruta usando mapa y brújula (o GPS) para orientarte en terreno real.' },
   { id: 'senal_rescate',      nombre: 'Practicar una señal de rescate',    icon: '🚩', dificultad: 'medio',   descripcion: 'Armá una señal de auxilio real (patrón de tres con piedras o ramas, destello de espejo, o SOS con silbato) y practicá el protocolo completo.' },
-  { id: 'aparejo_pesca',      nombre: 'Armar un aparejo de pesca improvisado', icon: '🎣', dificultad: 'medio', descripcion: 'Armá una línea o caña de pesca improvisada con materiales sueltos, sin necesidad de capturar nada: la idea es practicar el armado.' }
+  { id: 'aparejo_pesca',      nombre: 'Armar un aparejo de pesca improvisado', icon: '🎣', dificultad: 'medio', descripcion: 'Armá una línea o caña de pesca improvisada con materiales sueltos, sin necesidad de capturar nada: la idea es practicar el armado.' },
+  { id: 'trampa_caza',        nombre: 'Armar una trampa de caza',          icon: '🏹', dificultad: 'dificil', descripcion: 'Armá una trampa de lazo o de caída (sin activarla con carnada real) para practicar la técnica, en un lugar donde esté permitido.' },
+  { id: 'recolectar_comestibles', nombre: 'Recolectar comestibles silvestres', icon: '🧺', dificultad: 'medio', descripcion: 'Identificá y recolectá con certeza al menos tres plantas, frutos o mariscos comestibles de tu zona.' }
 ];
 
 const DESAFIOS_STORAGE_KEY = 'survivalAI_desafios_v1';
@@ -2626,7 +3053,7 @@ function cerrarResumenExpedicion(){
    NAVEGACIÓN Y RENDERIZADO
 ========================================================================= */
 
-const SECTION_KEYS = ['refugios','agua','fuego','orientacion','plantas','animales','primeros_auxilios','nudos','señales','comida','mochila','ia','clima','simulador','desafios','perfil','estadisticas'];
+const SECTION_KEYS = ['refugios','agua','fuego','orientacion','plantas','animales','primeros_auxilios','nudos','señales','comida','pesca','caza','recoleccion','mochila','ia','clima','gps','simulador','desafios','perfil','estadisticas'];
 
 let currentSection = 'refugios';
 let searchQuery = '';
@@ -2634,7 +3061,7 @@ let searchQuery = '';
 function buildNav(){
   const nav = document.getElementById('navList');
   nav.innerHTML = SECTION_KEYS.map((key, i) => {
-    const NAV_LABELS = { mochila: 'Mochila interactiva', ia: 'IA de supervivencia', clima: 'Clima', simulador: 'Simulador de decisiones', desafios: 'Desafíos', perfil: 'Perfil del superviviente', estadisticas: 'Estadísticas' };
+    const NAV_LABELS = { mochila: 'Mochila interactiva', ia: 'IA de supervivencia', clima: 'Clima', gps: 'GPS y mapa offline', simulador: 'Simulador de decisiones', desafios: 'Desafíos', perfil: 'Perfil del superviviente', estadisticas: 'Estadísticas' };
     const label = NAV_LABELS[key] || (DATA[key] ? DATA[key].titulo : key);
     return `
       <div class="nav-item${key === currentSection ? ' active' : ''}" data-key="${key}" tabindex="0" role="button">
@@ -2651,6 +3078,7 @@ function buildNav(){
 }
 
 function navigate(key){
+  if(currentSection === 'gps' && key !== 'gps') gpsSuspender();
   currentSection = key;
   searchQuery = '';
   location.hash = key;
@@ -2721,7 +3149,7 @@ function renderGenericSection(key){
 /* ---------- MOCHILA INTERACTIVA ---------- */
 
 function renderMochilaSection(){
-  document.getElementById('sectionEyebrow').textContent = 'MÓDULO 11 — EQUIPO';
+  document.getElementById('sectionEyebrow').textContent = 'MÓDULO 14 — EQUIPO';
   document.getElementById('sectionTitle').textContent = 'Mochila interactiva';
   document.getElementById('sectionDesc').textContent = 'Armá tu lista de equipo, marcá lo que ya empacaste y controlá el peso total.';
   document.getElementById('toolbar').style.display = 'none';
@@ -3070,7 +3498,7 @@ function iaGenerarRespuesta(inputRaw){
 }
 
 function renderIASection(){
-  document.getElementById('sectionEyebrow').textContent = 'MÓDULO 12 — ASISTENTE';
+  document.getElementById('sectionEyebrow').textContent = 'MÓDULO 15 — ASISTENTE';
   document.getElementById('sectionTitle').textContent = 'IA de supervivencia';
   document.getElementById('sectionDesc').textContent = 'Describí tu situación y recibí una respuesta priorizada, basada en el contenido del manual.';
   document.getElementById('toolbar').style.display = 'none';
@@ -3164,7 +3592,7 @@ function climaDescribirCodigo(code){
 }
 
 function renderClimaSection(){
-  document.getElementById('sectionEyebrow').textContent = 'MÓDULO 13 — CLIMA';
+  document.getElementById('sectionEyebrow').textContent = 'MÓDULO 16 — CLIMA';
   document.getElementById('sectionTitle').textContent = 'Clima';
   document.getElementById('sectionDesc').textContent = 'Si tu navegador lo permite, consultamos la temperatura, el viento y la lluvia de tu zona, y la IA te dice qué priorizar.';
   document.getElementById('toolbar').style.display = 'none';
@@ -3356,6 +3784,607 @@ function renderClimaCard(state){
 function trackConsultaClima(){
   progressState.consultasClima = (progressState.consultasClima || 0) + 1;
   otorgarXP(8, 'Consultaste el clima de tu zona');
+}
+
+/* =========================================================================
+   GPS: COORDENADAS + BRÚJULA + MAPA OFFLINE
+   Tres cosas independientes que se combinan:
+   1) Coordenadas (lat/long decimal, DMS y UTM) vía navigator.geolocation.
+      Esto funciona sin internet: el chip GPS del teléfono solo necesita
+      ver satélites, no datos móviles.
+   2) Brújula vía sensores de orientación del teléfono (también offline).
+   3) Un mapa (Leaflet + OpenStreetMap) que se puede precargar ("descargar
+      esta zona") mientras hay wifi/datos, guardando los mosaicos en el
+      Cache Storage del navegador para poder verlos después sin señal.
+      Si nunca se precargó la zona, igual se muestran las coordenadas y
+      la brújula: eso solo ya alcanza para pedir ayuda o anotarlo.
+========================================================================= */
+
+const GPS_WAYPOINTS_KEY = 'survivalai_gps_waypoints';
+const GPS_TILE_CACHE = 'survivalai-maptiles-v1';
+const GPS_TILE_URL_TEMPLATE = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+const GPS_TILE_SUBDOMAINS = ['a', 'b', 'c'];
+const GPS_MAX_TILES_PER_DESCARGA = 1400; // tope prudente para no abusar del servidor de mosaicos
+
+let gpsWaypoints = [];
+let gpsWatchId = null;
+let gpsPos = null;          // { lat, lon, accuracy, altitude, timestamp }
+let gpsError = '';
+let gpsBuscando = false;
+let gpsHeading = null;      // grados 0-360, 0 = norte
+let gpsCompassEstado = 'inactiva'; // inactiva | pidiendo-permiso | activa | no-disponible
+let gpsMap = null;
+let gpsMapMarker = null;
+let gpsMapAccuracyCircle = null;
+let gpsMapCargando = false;
+let gpsMapDisponible = null; // null = todavía no se supo, true/false luego de intentar cargar Leaflet
+let gpsWaypointLayer = null;
+let gpsDownloadState = null; // { enCurso, hechos, total, errores }
+
+function cargarGpsWaypoints(){
+  const guardado = leerStorage(GPS_WAYPOINTS_KEY);
+  if(Array.isArray(guardado)) gpsWaypoints = guardado;
+}
+
+function guardarGpsWaypointsStorage(){
+  guardarStorage(GPS_WAYPOINTS_KEY, gpsWaypoints);
+}
+
+function renderGpsSection(){
+  document.getElementById('sectionEyebrow').textContent = 'MÓDULO 21 — GPS Y MAPA OFFLINE';
+  document.getElementById('sectionTitle').textContent = 'GPS y mapa offline';
+  document.getElementById('sectionDesc').textContent = 'Coordenadas exactas y brújula, disponibles sin señal. Si precargás el mapa de tu zona antes de salir, también vas a ver tu posición sobre el mapa estando offline.';
+  document.getElementById('toolbar').style.display = 'none';
+  renderGpsContent();
+}
+
+function renderGpsContent(){
+  const content = document.getElementById('content');
+  if(!content) return;
+
+  const bloques = [];
+
+  if(gpsError){
+    bloques.push(`<div class="gps-alert">⚠️ ${escapeHtml(gpsError)}</div>`);
+  }
+
+  bloques.push(`
+    <div class="gps-actions">
+      ${gpsWatchId === null
+        ? `<button class="btn" id="gpsDetectarBtn">📍 Detectar ubicación</button>`
+        : `<button class="btn btn-ghost" id="gpsDetenerBtn">⏹ Detener seguimiento</button>`}
+      ${gpsPos ? `<button class="btn btn-ghost" id="gpsCopiarBtn">Copiar coordenadas</button>` : ''}
+      ${gpsPos ? `<button class="btn btn-ghost" id="gpsGuardarWpBtn">💾 Guardar en el diario</button>` : ''}
+    </div>
+  `);
+
+  bloques.push('<div class="gps-columns">');
+  bloques.push(renderGpsCoordsCard());
+  bloques.push(renderGpsCompassCard());
+  bloques.push('</div>');
+
+  bloques.push(renderGpsWaypointFormZone());
+  bloques.push(renderGpsMapCard());
+  bloques.push(renderGpsWaypointsCard());
+
+  content.innerHTML = bloques.join('');
+  attachGpsListeners();
+
+  // El mapa se inicializa después de insertar el HTML, porque Leaflet necesita
+  // que el div #gpsMap ya exista en el DOM.
+  gpsInitMap();
+}
+
+function renderGpsCoordsCard(){
+  if(gpsBuscando){
+    return `<div class="gps-card"><h3>Coordenadas</h3><div class="empty-state" style="padding:20px;">// Buscando señal GPS…</div></div>`;
+  }
+  if(!gpsPos){
+    return `
+      <div class="gps-card">
+        <h3>Coordenadas</h3>
+        <div class="empty-state" style="padding:20px;">// Tocá "Detectar ubicación" para ver tu lat/long, UTM y brújula. Tu navegador te va a pedir permiso una sola vez.</div>
+      </div>`;
+  }
+  const dms = `${gpsFormatDMS(gpsPos.lat, true)} ${gpsFormatDMS(gpsPos.lon, false)}`;
+  let utmTxt = '—';
+  try{
+    const utm = latLonToUTM(gpsPos.lat, gpsPos.lon);
+    utmTxt = `${utm.zone}${utm.hemisphere} ${Math.round(utm.easting)}E ${Math.round(utm.northing)}N`;
+  }catch(e){ /* fuera de rango, dejamos — */ }
+
+  return `
+    <div class="gps-card">
+      <h3>Coordenadas</h3>
+      <div class="gps-coords-grid">
+        <div class="gps-stat">
+          <div class="gps-stat-value">${gpsPos.lat.toFixed(5)}, ${gpsPos.lon.toFixed(5)}</div>
+          <div class="gps-stat-label">Decimal (lat, long)</div>
+        </div>
+        <div class="gps-stat">
+          <div class="gps-stat-value">${dms}</div>
+          <div class="gps-stat-label">Grados/min/seg</div>
+        </div>
+        <div class="gps-stat">
+          <div class="gps-stat-value">${utmTxt}</div>
+          <div class="gps-stat-label">UTM</div>
+        </div>
+        <div class="gps-stat">
+          <div class="gps-stat-value">±${Math.round(gpsPos.accuracy)} m</div>
+          <div class="gps-stat-label">Precisión</div>
+        </div>
+      </div>
+      <div class="gps-meta">
+        ${gpsPos.altitude != null ? `Altitud aprox: ${Math.round(gpsPos.altitude)} m · ` : ''}Actualizado: ${new Date(gpsPos.timestamp).toLocaleTimeString()}
+      </div>
+    </div>`;
+}
+
+function renderGpsCompassCard(){
+  let body = '';
+  if(gpsCompassEstado === 'no-disponible'){
+    body = `<div class="empty-state" style="padding:20px;">// Este dispositivo o navegador no expone sensores de orientación para la brújula.</div>`;
+  } else if(gpsCompassEstado === 'inactiva'){
+    body = `<button class="btn btn-ghost compass-permission" id="gpsActivarBrujulaBtn">🧭 Activar brújula</button>`;
+  } else if(gpsCompassEstado === 'pidiendo-permiso'){
+    body = `<div class="empty-state" style="padding:20px;">// Esperando permiso del navegador…</div>`;
+  } else {
+    const heading = gpsHeading != null ? gpsHeading : 0;
+    const cardinal = gpsHeadingToCardinal(heading);
+    body = `
+      <div class="compass-wrap">
+        <div class="compass-dial">
+          <span class="compass-label n">N</span>
+          <span class="compass-label e">E</span>
+          <span class="compass-label s">S</span>
+          <span class="compass-label w">O</span>
+          <div class="compass-needle" id="compassNeedle" style="transform:translate(-50%,-100%) rotate(${-heading}deg);"></div>
+          <div class="compass-center"></div>
+        </div>
+        <div class="compass-info">
+          <b id="compassHeadingValue">${Math.round(heading)}°</b>
+          <span id="compassCardinalValue">${cardinal}</span>
+        </div>
+      </div>`;
+  }
+  return `<div class="gps-card"><h3>Brújula</h3>${body}</div>`;
+}
+
+function renderGpsWaypointFormZone(){
+  if(!gpsPos) return '';
+  return `
+    <div class="gps-card" id="gpsWaypointFormCard" style="margin-top:16px; display:none;">
+      <h3>Guardar esta ubicación en el diario</h3>
+      <form class="gps-waypoint-form" id="gpsWaypointForm">
+        <input type="text" id="gpsWaypointNombre" placeholder="Nombre (ej: campamento, vado del río)" maxlength="60">
+        <button type="submit" class="btn">Guardar</button>
+      </form>
+    </div>`;
+}
+
+function renderGpsMapCard(){
+  const descargando = gpsDownloadState && gpsDownloadState.enCurso;
+  return `
+    <div class="gps-card gps-map-card" style="margin-top:16px;">
+      <div class="gps-map-inner-pad">
+        <h3>Mapa offline</h3>
+        <div id="gpsMap"></div>
+      </div>
+      <div class="gps-map-actions">
+        <button class="btn" id="gpsDescargarZonaBtn" ${descargando ? 'disabled' : ''}>📥 Descargar esta zona para uso offline</button>
+        <button class="btn btn-ghost" id="gpsBorrarMapasBtn">🗑️ Borrar mapas descargados</button>
+        ${gpsDownloadState ? `
+          <div class="gps-download-progress"><div class="gps-download-progress-bar" style="width:${gpsDownloadState.total ? Math.round(gpsDownloadState.hechos/gpsDownloadState.total*100) : 0}%;"></div></div>
+          <span class="gps-download-status">${gpsDownloadState.enCurso ? `${gpsDownloadState.hechos}/${gpsDownloadState.total} mosaicos` : `Listo: ${gpsDownloadState.hechos}/${gpsDownloadState.total} mosaicos guardados${gpsDownloadState.errores ? `, ${gpsDownloadState.errores} fallaron` : ''}`}</span>
+        ` : ''}
+      </div>
+      <div id="gpsMapFallback" class="gps-map-fallback" style="display:none;">
+        // No se pudo cargar el mapa de fondo (sin conexión y sin librería en caché). Igual tenés tus coordenadas exactas arriba: se las podés dictar por teléfono o radio a un equipo de rescate, o anotarlas en el diario.
+      </div>
+    </div>`;
+}
+
+function renderGpsWaypointsCard(){
+  if(gpsWaypoints.length === 0){
+    return `<div class="gps-card" style="margin-top:16px;"><h3>Diario de coordenadas</h3><div class="empty-state" style="padding:20px;">// Todavía no guardaste ninguna ubicación.</div></div>`;
+  }
+  const items = gpsWaypoints.slice().sort((a,b) => b.timestamp - a.timestamp).map(wp => `
+    <li class="gps-waypoint-item">
+      <span class="wp-name">${escapeHtml(wp.nombre)}</span>
+      <span class="wp-coords">${wp.lat.toFixed(4)}, ${wp.lon.toFixed(4)}</span>
+      <button class="wp-center" data-id="${wp.id}">Ver en mapa</button>
+      <button class="wp-del" data-id="${wp.id}">Eliminar</button>
+    </li>`).join('');
+  return `
+    <div class="gps-card" style="margin-top:16px;">
+      <h3>Diario de coordenadas</h3>
+      <ul class="gps-waypoint-list">${items}</ul>
+    </div>`;
+}
+
+function attachGpsListeners(){
+  const detBtn = document.getElementById('gpsDetectarBtn');
+  if(detBtn) detBtn.addEventListener('click', gpsIniciarSeguimiento);
+  const stopBtn = document.getElementById('gpsDetenerBtn');
+  if(stopBtn) stopBtn.addEventListener('click', gpsDetenerSeguimiento);
+  const copyBtn = document.getElementById('gpsCopiarBtn');
+  if(copyBtn) copyBtn.addEventListener('click', gpsCopiarCoordenadas);
+
+  const guardarWpBtn = document.getElementById('gpsGuardarWpBtn');
+  const wpFormCard = document.getElementById('gpsWaypointFormCard');
+  if(guardarWpBtn && wpFormCard) guardarWpBtn.addEventListener('click', () => {
+    wpFormCard.style.display = 'block';
+    const inp = document.getElementById('gpsWaypointNombre');
+    if(inp) inp.focus();
+  });
+  const wpForm = document.getElementById('gpsWaypointForm');
+  if(wpForm) wpForm.addEventListener('submit', e => {
+    e.preventDefault();
+    gpsGuardarWaypoint();
+  });
+
+  const brujulaBtn = document.getElementById('gpsActivarBrujulaBtn');
+  if(brujulaBtn) brujulaBtn.addEventListener('click', gpsActivarCompass);
+
+  const descargarBtn = document.getElementById('gpsDescargarZonaBtn');
+  if(descargarBtn) descargarBtn.addEventListener('click', gpsDescargarZona);
+  const borrarBtn = document.getElementById('gpsBorrarMapasBtn');
+  if(borrarBtn) borrarBtn.addEventListener('click', gpsBorrarMapasDescargados);
+
+  document.querySelectorAll('.gps-waypoint-item .wp-center').forEach(btn => {
+    btn.addEventListener('click', () => gpsCentrarWaypoint(btn.dataset.id));
+  });
+  document.querySelectorAll('.gps-waypoint-item .wp-del').forEach(btn => {
+    btn.addEventListener('click', () => gpsEliminarWaypoint(btn.dataset.id));
+  });
+}
+
+/* ---- Geolocalización ---- */
+
+function gpsIniciarSeguimiento(){
+  gpsError = '';
+  if(!('geolocation' in navigator)){
+    gpsError = 'Tu navegador no permite acceder a la ubicación en este dispositivo.';
+    renderGpsContent();
+    return;
+  }
+  gpsBuscando = true;
+  renderGpsContent();
+  gpsWatchId = navigator.geolocation.watchPosition(
+    pos => {
+      gpsBuscando = false;
+      gpsPos = {
+        lat: pos.coords.latitude,
+        lon: pos.coords.longitude,
+        accuracy: pos.coords.accuracy,
+        altitude: pos.coords.altitude,
+        timestamp: Date.now()
+      };
+      trackUsoGps();
+      renderGpsContent();
+      gpsActualizarMarcadorMapa();
+    },
+    err => {
+      gpsBuscando = false;
+      gpsWatchId = null;
+      gpsError = err.code === 1
+        ? 'No pudimos acceder a tu ubicación porque el permiso fue denegado. Podés habilitarlo en la configuración del navegador.'
+        : 'No se pudo obtener la posición todavía (puede tardar unos segundos al aire libre). Probá de nuevo.';
+      renderGpsContent();
+    },
+    { enableHighAccuracy: true, timeout: 20000, maximumAge: 2000 }
+  );
+}
+
+function gpsDetenerSeguimiento(){
+  if(gpsWatchId !== null){
+    navigator.geolocation.clearWatch(gpsWatchId);
+    gpsWatchId = null;
+  }
+  renderGpsContent();
+}
+
+function gpsSuspender(){
+  // Se llama al salir del módulo, para no seguir usando el GPS/brújula de fondo.
+  if(gpsWatchId !== null){
+    navigator.geolocation.clearWatch(gpsWatchId);
+    gpsWatchId = null;
+  }
+  window.removeEventListener('deviceorientationabsolute', gpsOrientationHandler);
+  window.removeEventListener('deviceorientation', gpsOrientationHandler);
+  gpsCompassEstado = 'inactiva';
+  gpsMap = null; // el div se destruye al re-renderizar la sección; forzamos reinicio si se vuelve a entrar
+}
+
+function gpsFormatDMS(deg, esLat){
+  const abs = Math.abs(deg);
+  const d = Math.floor(abs);
+  const minFloat = (abs - d) * 60;
+  const m = Math.floor(minFloat);
+  const s = ((minFloat - m) * 60).toFixed(1);
+  const letra = esLat ? (deg >= 0 ? 'N' : 'S') : (deg >= 0 ? 'E' : 'O');
+  return `${d}°${m}'${s}"${letra}`;
+}
+
+// Conversión lat/long (WGS84) a UTM. Fórmula estándar de proyección
+// transversa de Mercator, precisa para uso terrestre.
+function latLonToUTM(lat, lon){
+  const a = 6378137.0;
+  const f = 1 / 298.257223563;
+  const e2 = f * (2 - f);
+  const ep2 = e2 / (1 - e2);
+  const k0 = 0.9996;
+
+  const zone = Math.floor((lon + 180) / 6) + 1;
+  const lonOrigin = (zone - 1) * 6 - 180 + 3;
+  const latRad = lat * Math.PI / 180;
+  const lonRad = lon * Math.PI / 180;
+  const lonOriginRad = lonOrigin * Math.PI / 180;
+
+  const N = a / Math.sqrt(1 - e2 * Math.sin(latRad) * Math.sin(latRad));
+  const T = Math.tan(latRad) * Math.tan(latRad);
+  const C = ep2 * Math.cos(latRad) * Math.cos(latRad);
+  const A = Math.cos(latRad) * (lonRad - lonOriginRad);
+
+  const M = a * (
+    (1 - e2/4 - 3*e2*e2/64 - 5*e2*e2*e2/256) * latRad
+    - (3*e2/8 + 3*e2*e2/32 + 45*e2*e2*e2/1024) * Math.sin(2*latRad)
+    + (15*e2*e2/256 + 45*e2*e2*e2/1024) * Math.sin(4*latRad)
+    - (35*e2*e2*e2/3072) * Math.sin(6*latRad)
+  );
+
+  let easting = k0*N*(A + (1-T+C)*Math.pow(A,3)/6 + (5-18*T+T*T+72*C-58*ep2)*Math.pow(A,5)/120) + 500000;
+  let northing = k0*(M + N*Math.tan(latRad)*(A*A/2 + (5-T+9*C+4*C*C)*Math.pow(A,4)/24 + (61-58*T+T*T+600*C-330*ep2)*Math.pow(A,6)/720));
+  if(lat < 0) northing += 10000000;
+
+  return { zone, hemisphere: lat >= 0 ? 'N' : 'S', easting, northing };
+}
+
+function gpsCopiarCoordenadas(){
+  if(!gpsPos) return;
+  const texto = `${gpsPos.lat.toFixed(6)}, ${gpsPos.lon.toFixed(6)}`;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(texto).catch(() => {});
+  }
+}
+
+function trackUsoGps(){
+  progressState.usosGps = (progressState.usosGps || 0) + 1;
+  if(progressState.usosGps === 1) otorgarXP(8, 'Detectaste tu ubicación con GPS');
+}
+
+/* ---- Brújula ---- */
+
+function gpsHeadingToCardinal(deg){
+  const dirs = ['N','NE','E','SE','S','SO','O','NO'];
+  return dirs[Math.round(((deg % 360) + 360) % 360 / 45) % 8];
+}
+
+function gpsOrientationHandler(e){
+  let heading = null;
+  if(typeof e.webkitCompassHeading === 'number'){
+    heading = e.webkitCompassHeading; // iOS: ya viene como rumbo real 0-360
+  } else if(e.alpha != null){
+    heading = 360 - e.alpha; // aproximación estándar para Android/otros
+  }
+  if(heading == null) return;
+  heading = ((heading % 360) + 360) % 360;
+  gpsHeading = heading;
+  // Actualizamos el DOM directo (sin re-render completo) para que la aguja
+  // se mueva fluida y no se pierda el foco de otros controles.
+  const needle = document.getElementById('compassNeedle');
+  const valEl = document.getElementById('compassHeadingValue');
+  const cardEl = document.getElementById('compassCardinalValue');
+  if(needle) needle.style.transform = `translate(-50%,-100%) rotate(${-heading}deg)`;
+  if(valEl) valEl.textContent = `${Math.round(heading)}°`;
+  if(cardEl) cardEl.textContent = gpsHeadingToCardinal(heading);
+}
+
+function gpsActivarCompass(){
+  if(typeof DeviceOrientationEvent === 'undefined'){
+    gpsCompassEstado = 'no-disponible';
+    renderGpsContent();
+    return;
+  }
+  if(typeof DeviceOrientationEvent.requestPermission === 'function'){
+    gpsCompassEstado = 'pidiendo-permiso';
+    renderGpsContent();
+    DeviceOrientationEvent.requestPermission().then(resp => {
+      if(resp === 'granted'){
+        gpsCompassEstado = 'activa';
+        window.addEventListener('deviceorientation', gpsOrientationHandler);
+      } else {
+        gpsCompassEstado = 'no-disponible';
+      }
+      renderGpsContent();
+    }).catch(() => {
+      gpsCompassEstado = 'no-disponible';
+      renderGpsContent();
+    });
+  } else {
+    gpsCompassEstado = 'activa';
+    window.addEventListener('deviceorientationabsolute', gpsOrientationHandler);
+    window.addEventListener('deviceorientation', gpsOrientationHandler);
+    renderGpsContent();
+  }
+}
+
+/* ---- Diario de coordenadas (waypoints) ---- */
+
+function gpsGuardarWaypoint(){
+  if(!gpsPos) return;
+  const inp = document.getElementById('gpsWaypointNombre');
+  const nombre = (inp && inp.value.trim()) || `Punto ${gpsWaypoints.length + 1}`;
+  const wp = { id: 'wp_' + Date.now(), nombre, lat: gpsPos.lat, lon: gpsPos.lon, timestamp: Date.now() };
+  gpsWaypoints.push(wp);
+  guardarGpsWaypointsStorage();
+  otorgarXP(5, 'Guardaste una ubicación en el diario');
+  renderGpsContent();
+}
+
+function gpsEliminarWaypoint(id){
+  gpsWaypoints = gpsWaypoints.filter(w => w.id !== id);
+  guardarGpsWaypointsStorage();
+  renderGpsContent();
+}
+
+function gpsCentrarWaypoint(id){
+  const wp = gpsWaypoints.find(w => w.id === id);
+  if(!wp || !gpsMap) return;
+  gpsMap.setView([wp.lat, wp.lon], Math.max(gpsMap.getZoom(), 14));
+}
+
+/* ---- Mapa offline (Leaflet + OpenStreetMap) ---- */
+
+function gpsInitMap(){
+  const container = document.getElementById('gpsMap');
+  if(!container) return;
+
+  if(typeof L === 'undefined'){
+    // La librería de mapas no está disponible (ni en red ni en caché todavía).
+    gpsMapDisponible = false;
+    const fb = document.getElementById('gpsMapFallback');
+    if(fb) fb.style.display = 'block';
+    container.style.display = 'none';
+    return;
+  }
+
+  gpsMapDisponible = true;
+  const centro = gpsPos ? [gpsPos.lat, gpsPos.lon]
+    : (gpsWaypoints[0] ? [gpsWaypoints[0].lat, gpsWaypoints[0].lon] : [-38.4, -63.6]); // centro aprox. Argentina
+
+  gpsMap = L.map(container, { attributionControl: true }).setView(centro, gpsPos ? 15 : 5);
+  L.tileLayer(GPS_TILE_URL_TEMPLATE, {
+    subdomains: GPS_TILE_SUBDOMAINS,
+    maxZoom: 19,
+    attribution: '© OpenStreetMap'
+  }).addTo(gpsMap);
+
+  gpsWaypointLayer = L.layerGroup().addTo(gpsMap);
+  gpsRedibujarWaypointsEnMapa();
+  gpsActualizarMarcadorMapa();
+
+  // Forzamos un recálculo de tamaño: el contenedor pudo haber estado
+  // oculto (display:none) durante la carga inicial del layout.
+  setTimeout(() => { if(gpsMap) gpsMap.invalidateSize(); }, 200);
+}
+
+function gpsRedibujarWaypointsEnMapa(){
+  if(!gpsMap || !gpsWaypointLayer) return;
+  gpsWaypointLayer.clearLayers();
+  gpsWaypoints.forEach(wp => {
+    L.marker([wp.lat, wp.lon]).bindPopup(escapeHtml(wp.nombre)).addTo(gpsWaypointLayer);
+  });
+}
+
+function gpsActualizarMarcadorMapa(){
+  if(!gpsMap || !gpsPos) return;
+  const latlng = [gpsPos.lat, gpsPos.lon];
+  if(!gpsMapMarker){
+    gpsMapMarker = L.circleMarker(latlng, { radius: 7, color: '#ff7a33', fillColor: '#ff7a33', fillOpacity: 1 }).addTo(gpsMap);
+  } else {
+    gpsMapMarker.setLatLng(latlng);
+  }
+  if(!gpsMapAccuracyCircle){
+    gpsMapAccuracyCircle = L.circle(latlng, { radius: gpsPos.accuracy, color: '#ff7a33', fillColor: '#ff7a33', fillOpacity: .08, weight: 1 }).addTo(gpsMap);
+  } else {
+    gpsMapAccuracyCircle.setLatLng(latlng);
+    gpsMapAccuracyCircle.setRadius(gpsPos.accuracy);
+  }
+}
+
+function gpsLon2Tile(lon, zoom){
+  return Math.floor((lon + 180) / 360 * Math.pow(2, zoom));
+}
+function gpsLat2Tile(lat, zoom){
+  const rad = lat * Math.PI / 180;
+  return Math.floor((1 - Math.log(Math.tan(rad) + 1/Math.cos(rad)) / Math.PI) / 2 * Math.pow(2, zoom));
+}
+
+async function gpsDescargarZona(){
+  if(!gpsMap || !('caches' in window)) return;
+  gpsError = '';
+
+  const zoomActual = gpsMap.getZoom();
+  const bounds = gpsMap.getBounds();
+  const zooms = [zoomActual, Math.min(zoomActual + 1, 18), Math.min(zoomActual + 2, 18)]
+    .filter((z, i, arr) => arr.indexOf(z) === i);
+
+  // Armamos la lista completa de mosaicos a bajar en los niveles de zoom elegidos.
+  let tiles = [];
+  zooms.forEach(z => {
+    const xMin = gpsLon2Tile(bounds.getWest(), z);
+    const xMax = gpsLon2Tile(bounds.getEast(), z);
+    const yMin = gpsLat2Tile(bounds.getNorth(), z);
+    const yMax = gpsLat2Tile(bounds.getSouth(), z);
+    for(let x = xMin; x <= xMax; x++){
+      for(let y = yMin; y <= yMax; y++){
+        tiles.push({ x, y, z });
+      }
+    }
+  });
+
+  if(tiles.length > GPS_MAX_TILES_PER_DESCARGA){
+    gpsError = `La zona visible es muy grande para descargar de una (${tiles.length} mosaicos). Acercá el zoom a la zona específica que te interesa y volvé a intentar.`;
+    renderGpsContent();
+    return;
+  }
+
+  gpsDownloadState = { enCurso: true, hechos: 0, total: tiles.length, errores: 0 };
+  renderGpsMapProgressOnly();
+
+  const cache = await caches.open(GPS_TILE_CACHE);
+  let hechos = 0, errores = 0;
+
+  for(const t of tiles){
+    const sub = GPS_TILE_SUBDOMAINS[(t.x + t.y) % GPS_TILE_SUBDOMAINS.length];
+    const url = GPS_TILE_URL_TEMPLATE.replace('{s}', sub).replace('{z}', t.z).replace('{x}', t.x).replace('{y}', t.y);
+    try{
+      // mode:'no-cors' porque los servidores de mosaicos de OSM no exponen
+      // cabeceras CORS; igual se puede guardar la respuesta "opaca" en el
+      // Cache Storage y usarla después para mostrar la imagen offline.
+      const resp = await fetch(url, { mode: 'no-cors' });
+      await cache.put(url, resp);
+    }catch(e){
+      errores++;
+    }
+    hechos++;
+    if(hechos % 5 === 0 || hechos === tiles.length){
+      gpsDownloadState = { enCurso: hechos < tiles.length, hechos, total: tiles.length, errores };
+      renderGpsMapProgressOnly();
+    }
+  }
+
+  gpsDownloadState = { enCurso: false, hechos, total: tiles.length, errores };
+  renderGpsContent();
+  if(errores === 0) otorgarXP(10, 'Descargaste un mapa para uso offline');
+}
+
+function renderGpsMapProgressOnly(){
+  // Actualiza solo la barra de progreso sin re-renderizar todo (evita
+  // reconstruir el mapa Leaflet en cada tick de la descarga).
+  const bar = document.querySelector('.gps-download-progress-bar');
+  const status = document.querySelector('.gps-download-status');
+  const wrap = document.querySelector('.gps-map-actions');
+  if(bar && gpsDownloadState){
+    bar.style.width = `${gpsDownloadState.total ? Math.round(gpsDownloadState.hechos/gpsDownloadState.total*100) : 0}%`;
+  }
+  if(status && gpsDownloadState){
+    status.textContent = gpsDownloadState.enCurso
+      ? `${gpsDownloadState.hechos}/${gpsDownloadState.total} mosaicos`
+      : `Listo: ${gpsDownloadState.hechos}/${gpsDownloadState.total} mosaicos guardados`;
+  }
+  if(wrap && !document.querySelector('.gps-download-progress') && gpsDownloadState){
+    // Primera vez que aparece la barra: recién ahí re-renderizamos completo.
+    renderGpsContent();
+  }
+}
+
+async function gpsBorrarMapasDescargados(){
+  if(!('caches' in window)) return;
+  await caches.delete(GPS_TILE_CACHE);
+  gpsDownloadState = null;
+  renderGpsContent();
 }
 
 /* ---------- SIMULADOR CON DECISIONES ---------- */
@@ -3721,7 +4750,7 @@ function cargarSimulador(){
 }
 
 function renderSimuladorSection(){
-  document.getElementById('sectionEyebrow').textContent = 'MÓDULO 14 — SIMULACIÓN';
+  document.getElementById('sectionEyebrow').textContent = 'MÓDULO 17 — SIMULACIÓN';
   document.getElementById('sectionTitle').textContent = 'Simulador de decisiones';
   document.getElementById('sectionDesc').textContent = 'Elegí un escenario y tomá decisiones bajo presión. Cada elección afecta tus estadísticas de supervivencia.';
   document.getElementById('toolbar').style.display = 'none';
@@ -3889,7 +4918,10 @@ const ACHIEVEMENTS = [
   { id: 'modulo_primeros_auxilios', categoria: 'Manual de campo', nombre: 'Manos que curan', desc: 'Visitaste el módulo de Primeros auxilios.', icon: '🩹', xp: 10, check: s => s.modulosVisitadosIds.includes('primeros_auxilios') },
   { id: 'modulo_nudos',             categoria: 'Manual de campo', nombre: 'Maestro de nudos', desc: 'Visitaste la Biblioteca de nudos.', icon: '🪢', xp: 10, check: s => s.modulosVisitadosIds.includes('nudos') },
   { id: 'modulo_señales',    categoria: 'Manual de campo', nombre: 'Nunca invisible',   desc: 'Visitaste el módulo de Señales y rescate.', icon: '🚩', xp: 10, check: s => s.modulosVisitadosIds.includes('señales') },
-  { id: 'modulo_comida',     categoria: 'Manual de campo', nombre: 'Buen proveedor',    desc: 'Visitaste el módulo de Obtención de comida.', icon: '🎣', xp: 10, check: s => s.modulosVisitadosIds.includes('comida') },
+  { id: 'modulo_comida',     categoria: 'Manual de campo', nombre: 'Buen proveedor',    desc: 'Visitaste el módulo de Obtención de comida.', icon: '🍲', xp: 10, check: s => s.modulosVisitadosIds.includes('comida') },
+  { id: 'modulo_pesca',      categoria: 'Manual de campo', nombre: 'Pescador de río',   desc: 'Visitaste el módulo de Pesca de supervivencia.', icon: '🎣', xp: 10, check: s => s.modulosVisitadosIds.includes('pesca') },
+  { id: 'modulo_caza',       categoria: 'Manual de campo', nombre: 'Cazador de campo',  desc: 'Visitaste el módulo de Caza y trampeo.', icon: '🏹', xp: 10, check: s => s.modulosVisitadosIds.includes('caza') },
+  { id: 'modulo_recoleccion',categoria: 'Manual de campo', nombre: 'Recolector experto',desc: 'Visitaste el módulo de Recolección silvestre.', icon: '🧺', xp: 10, check: s => s.modulosVisitadosIds.includes('recoleccion') },
 
   /* --- Mochila interactiva --- */
   { id: 'mochila_lista',   categoria: 'Mochila', nombre: 'Mochila lista',    desc: 'Empacaste todos los ítems esenciales.', icon: '🎒', xp: 30, check: s => s.esencialesTotal > 0 && s.esencialesPacked >= s.esencialesTotal },
@@ -4307,7 +5339,7 @@ function borrarTodosLosDatos(){
 /* ---------- DESAFÍOS REALES ---------- */
 
 function renderDesafiosSection(){
-  document.getElementById('sectionEyebrow').textContent = 'MÓDULO 15 — PRÁCTICA';
+  document.getElementById('sectionEyebrow').textContent = 'MÓDULO 18 — PRÁCTICA';
   document.getElementById('sectionTitle').textContent = 'Desafíos';
   document.getElementById('sectionDesc').textContent = 'Llevá lo aprendido a la práctica. Completá la actividad, subí una foto como evidencia y ganá XP e insignias.';
   document.getElementById('toolbar').style.display = 'none';
@@ -4396,7 +5428,7 @@ function renderDesafioCard(c){
 }
 
 function renderEstadisticasSection(){
-  document.getElementById('sectionEyebrow').textContent = 'MÓDULO 17 — PROGRESO';
+  document.getElementById('sectionEyebrow').textContent = 'MÓDULO 20 — PROGRESO';
   document.getElementById('sectionTitle').textContent = 'Estadísticas';
   document.getElementById('sectionDesc').textContent = 'Tu nivel, experiencia y logros acumulados usando el manual.';
   document.getElementById('toolbar').style.display = 'none';
@@ -4550,7 +5582,10 @@ const ESPECIALIDAD_META = {
   animales:           { nombre: 'Naturalista', icon: '🐾' },
   primeros_auxilios:  { nombre: 'Rescatista',  icon: '🩹' },
   'señales':          { nombre: 'Señalizador', icon: '🚩' },
-  comida:             { nombre: 'Proveedor',   icon: '🎣' }
+  comida:             { nombre: 'Proveedor',   icon: '🍲' },
+  pesca:              { nombre: 'Pescador',    icon: '🎣' },
+  caza:               { nombre: 'Cazador',     icon: '🏹' },
+  recoleccion:        { nombre: 'Recolector',  icon: '🧺' }
 };
 const ESPECIALIDAD_DESAFIOS = {
   refugios: ['refugio_basico'],
@@ -4561,7 +5596,10 @@ const ESPECIALIDAD_DESAFIOS = {
   animales: [],
   primeros_auxilios: [],
   'señales': ['senal_rescate'],
-  comida: ['aparejo_pesca']
+  comida: [],
+  pesca: ['aparejo_pesca'],
+  caza: ['trampa_caza'],
+  recoleccion: ['recolectar_comestibles']
 };
 
 function calcularEspecialidad(){
@@ -4580,7 +5618,7 @@ function calcularEspecialidad(){
 }
 
 function renderPerfilSection(){
-  document.getElementById('sectionEyebrow').textContent = 'MÓDULO 16 — PERFIL';
+  document.getElementById('sectionEyebrow').textContent = 'MÓDULO 19 — PERFIL';
   document.getElementById('sectionTitle').textContent = 'Perfil del superviviente';
   document.getElementById('sectionDesc').textContent = 'Tu ficha de superviviente: nivel, rango, racha y especialidad, calculados a partir de tu actividad real en el manual.';
   document.getElementById('toolbar').style.display = 'none';
@@ -4708,6 +5746,132 @@ function renderPerfilContent(){
   }
 }
 
+/* ---------- PANEL DE EMERGENCIA (acceso rápido, 1-2 toques) ---------- */
+
+const SOS_TOPICS = [
+  { id: 'sos-primeros-auxilios', icon: '🩹', label: 'Primeros auxilios' },
+  { id: 'sos-pedir-ayuda', icon: '📢', label: 'Cómo pedir ayuda' },
+  { id: 'sos-agua', icon: '💧', label: 'Potabilizar agua' },
+  { id: 'sos-señales', icon: '🚩', label: 'Señales de rescate' },
+  { id: 'sos-perdido', icon: '🧭', label: 'Estoy perdido' }
+];
+
+const SOS_TITLES = {
+  'sos-primeros-auxilios': 'Primeros auxilios',
+  'sos-pedir-ayuda': 'Cómo pedir ayuda',
+  'sos-agua': 'Potabilizar agua',
+  'sos-señales': 'Señales de rescate',
+  'sos-perdido': 'Estoy perdido'
+};
+
+function sosCardsFromModulo(key, filterIds){
+  const section = DATA[key];
+  if(!section) return '';
+  const items = filterIds ? section.items.filter(it => filterIds.includes(it.id)) : section.items;
+  return items.map(renderCard).join('');
+}
+
+function sosCardFromRule(ruleId, titulo){
+  const rule = IA_RULES.find(r => r.id === ruleId);
+  if(!rule) return '';
+  const steps = rule.pasos.map(p => `<li>${escapeHtml(p)}</li>`).join('');
+  return `
+    <article class="card">
+      <div class="card-head"><h3 class="card-title">${escapeHtml(titulo)}</h3></div>
+      <p class="card-summary">${escapeHtml(rule.texto)}</p>
+      <ol class="steps">${steps}</ol>
+    </article>`;
+}
+
+function sosPedirAyudaCard(){
+  const pasos = [
+    'Si tenés señal de celular, llamá al número de emergencia local antes que cualquier otra cosa.',
+    'Sin señal, un silbato es más eficaz que gritar: tres pitidos cortos y pausados es la señal universal de auxilio.',
+    'Repetí cualquier señal (grito, silbato, destello, fogata) en grupos de tres, con pausas, para diferenciarla de un ruido natural.',
+    'Si viajás con GPS o baliza de emergencia (PLB), activala apenas confirmes que estás en problemas.',
+    'Antes de salir de viaje, avisá siempre tu recorrido a alguien: acelera enormemente cualquier búsqueda.'
+  ];
+  return `
+    <article class="card">
+      <div class="card-head"><h3 class="card-title">Cómo pedir ayuda</h3></div>
+      <p class="card-summary">Hacerte notar y pedir auxilio de forma efectiva puede ser la diferencia en una emergencia.</p>
+      <ol class="steps">${pasos.map(p => `<li>${escapeHtml(p)}</li>`).join('')}</ol>
+    </article>`;
+}
+
+function renderSosDetail(topicId){
+  const modal = document.getElementById('sosModal');
+  let cardsHtml = '';
+  if(topicId === 'sos-primeros-auxilios'){
+    cardsHtml = sosCardsFromModulo('primeros_auxilios');
+  } else if(topicId === 'sos-pedir-ayuda'){
+    cardsHtml = sosPedirAyudaCard();
+  } else if(topicId === 'sos-agua'){
+    cardsHtml = sosCardsFromModulo('agua', ['agua-hervido', 'agua-filtro-improvisado', 'agua-destilador-solar']);
+  } else if(topicId === 'sos-señales'){
+    cardsHtml = sosCardsFromModulo('señales');
+  } else if(topicId === 'sos-perdido'){
+    cardsHtml = sosCardFromRule('perdido', 'Qué hacer si estás perdido');
+  }
+  modal.innerHTML = `
+    <div class="sos-modal-head">
+      <button class="sos-back" id="sosBack" aria-label="Volver">←</button>
+      <h2>${escapeHtml(SOS_TITLES[topicId] || '')}</h2>
+      <button class="sos-close" id="sosClose" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="sos-modal-body sos-detail-grid">${cardsHtml}</div>
+  `;
+  document.getElementById('sosBack').addEventListener('click', renderSosMenu);
+  document.getElementById('sosClose').addEventListener('click', closeSosPanel);
+  modal.scrollTop = 0;
+}
+
+function renderSosMenu(){
+  const modal = document.getElementById('sosModal');
+  modal.innerHTML = `
+    <div class="sos-modal-head">
+      <h2>🚨 Emergencia</h2>
+      <button class="sos-close" id="sosClose" aria-label="Cerrar">✕</button>
+    </div>
+    <p class="sos-modal-sub">Tocá un tema para ver los pasos al instante.</p>
+    <div class="sos-grid">
+      ${SOS_TOPICS.map(t => `
+        <button class="sos-topic-btn" data-id="${t.id}">
+          <span class="sos-topic-icon">${t.icon}</span>
+          <span class="sos-topic-label">${escapeHtml(t.label)}</span>
+        </button>`).join('')}
+    </div>
+  `;
+  document.getElementById('sosClose').addEventListener('click', closeSosPanel);
+  modal.querySelectorAll('.sos-topic-btn').forEach(btn => {
+    btn.addEventListener('click', () => renderSosDetail(btn.dataset.id));
+  });
+}
+
+function openSosPanel(){
+  renderSosMenu();
+  document.getElementById('sosOverlay').classList.add('open');
+}
+
+function closeSosPanel(){
+  document.getElementById('sosOverlay').classList.remove('open');
+}
+
+function initSosPanel(){
+  const btn = document.getElementById('sosButton');
+  const overlay = document.getElementById('sosOverlay');
+  if(!btn || !overlay) return;
+  btn.addEventListener('click', openSosPanel);
+  overlay.addEventListener('click', e => {
+    if(e.target === overlay) closeSosPanel();
+  });
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape' && overlay.classList.contains('open')) closeSosPanel();
+  });
+}
+
+initSosPanel();
+
 /* ---------- RENDER PRINCIPAL ---------- */
 
 function render(){
@@ -4720,6 +5884,8 @@ function render(){
     renderIASection();
   } else if(currentSection === 'clima'){
     renderClimaSection();
+  } else if(currentSection === 'gps'){
+    renderGpsSection();
   } else if(currentSection === 'simulador'){
     renderSimuladorSection();
   } else if(currentSection === 'desafios'){
@@ -4773,6 +5939,7 @@ document.getElementById('navList').addEventListener('mouseover', e => {
 window.addEventListener('hashchange', () => {
   const key = location.hash.replace('#', '');
   if(SECTION_KEYS.includes(key)){
+    if(currentSection === 'gps' && key !== 'gps') gpsSuspender();
     currentSection = key;
     searchQuery = '';
     document.getElementById('searchInput').value = '';
@@ -4829,6 +5996,7 @@ function init(){
   cargarSimulador();
   cargarDesafios();
   cargarClima();
+  cargarGpsWaypoints();
   cargarPerfil();
   cargarExpedicion();
   const initial = location.hash.replace('#', '');
