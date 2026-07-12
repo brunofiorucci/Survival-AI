@@ -3001,6 +3001,13 @@ function finalizarExpedicionConDatos(notas, fotosSalida){
   if(equipoCompleto) progressState.expedicionEquipoCompleto = true;
   guardarProgreso();
 
+  // El tiempo que corrió el cronómetro de la expedición se suma solo a
+  // "Horas en la naturaleza" del perfil (redondeado a un decimal), para que
+  // el usuario no tenga que cargarlo a mano después de cada salida.
+  const horasExpedicion = Math.round((duracionMs / 3600000) * 10) / 10;
+  profileState.horasNaturaleza = Math.round(((profileState.horasNaturaleza || 0) + horasExpedicion) * 10) / 10;
+  guardarPerfil();
+
   otorgarXP(25, 'Expedición completada');
   if(notasLimpias) otorgarXP(10, 'Aprendizaje registrado');
   if(fotosSalida.length) otorgarXP(Math.min(fotosSalida.length, 3) * 5, 'Fotos de la expedición');
@@ -3032,8 +3039,10 @@ function finalizarExpedicionConDatos(notas, fotosSalida){
   guardarExpedicion();
   renderExpeditionBar();
   if(currentSection === 'desafios') renderDesafiosSection();
+  if(currentSection === 'perfil') renderPerfilContent();
+  if(currentSection === 'estadisticas') renderEstadisticasSection();
 
-  mostrarResumenExpedicion({ duracionMs, fotosGanadas, xpGanadaTotal, logrosGanados, nivelActual, plan, notas: notasLimpias });
+  mostrarResumenExpedicion({ duracionMs, horasExpedicion, fotosGanadas, xpGanadaTotal, logrosGanados, nivelActual, plan, notas: notasLimpias });
 }
 
 function renderExpeditionBar(){
@@ -3167,6 +3176,7 @@ function mostrarResumenExpedicion(stats){
       <div class="expedition-summary-stat"><span>🏆</span><b>+${stats.xpGanadaTotal}</b><small>XP ganada</small></div>
       <div class="expedition-summary-stat"><span>📈</span><b>Nivel ${stats.nivelActual}</b><small>Nivel actual</small></div>
     </div>
+    <p class="expedition-summary-empty" style="color:var(--safe);">✅ Sumamos ${stats.horasExpedicion} h a tu perfil · Total: ${profileState.horasNaturaleza} h en la naturaleza</p>
     <div class="expedition-summary-achievements">
       <h3>🎖️ Logros desbloqueados</h3>
       ${logrosHtml}

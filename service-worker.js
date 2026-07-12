@@ -12,7 +12,7 @@
    versión del HTML. Se borran solo si el usuario toca "Borrar mapas
    descargados" en la app, o si el propio navegador libera espacio. */
 
-const CACHE_NAME = 'survivalai-v5';
+const CACHE_NAME = 'survivalai-v6';
 const MAP_TILE_CACHE_PREFIX = 'survivalai-maptiles';
 const ASSETS_TO_CACHE = [
   './',
