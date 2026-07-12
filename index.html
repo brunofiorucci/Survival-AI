@@ -1018,6 +1018,88 @@
   .welcome-modal-check input{accent-color:var(--accent);}
   .welcome-modal .btn{width:100%;}
 
+  /* ---------- Acerca del desarrollador ---------- */
+  .about-dev-overlay{
+    display:none; position:fixed; inset:0; z-index:85;
+    background:rgba(6,8,6,.78); backdrop-filter:blur(2px);
+    align-items:center; justify-content:center; padding:20px;
+  }
+  .about-dev-overlay.open{display:flex;}
+  .about-dev-modal{
+    background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius);
+    max-width:420px; width:100%; padding:0; max-height:88vh; overflow-y:auto;
+  }
+  .about-dev-head{
+    padding:28px 26px 18px; text-align:center;
+    border-bottom:1px solid var(--border-soft);
+    background:linear-gradient(180deg, rgba(255,122,51,.08), transparent);
+  }
+  .dev-avatar-wrap{
+    width:78px; height:78px; border-radius:50%; padding:3px; margin:0 auto 14px;
+    background:linear-gradient(135deg, var(--accent), var(--accent-2));
+  }
+  .dev-avatar{
+    width:100%; height:100%; border-radius:50%; object-fit:cover;
+    background:var(--surface); border:2px solid var(--bg-elevated);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Oswald', sans-serif; font-weight:700; font-size:24px; color:var(--accent);
+  }
+  .about-dev-head h2{
+    font-family:'Oswald', sans-serif; font-size:19px; font-weight:600; text-transform:uppercase;
+    letter-spacing:.02em; margin:0 0 4px;
+  }
+  .dev-role{
+    font-family:'IBM Plex Mono', monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--accent);
+  }
+  .about-dev-body{padding:18px 26px 6px;}
+  .dev-bio{
+    color:var(--text-muted); font-size:12.5px; line-height:1.6; text-align:center;
+    margin:0 0 18px; padding-bottom:18px; border-bottom:1px solid var(--border-soft);
+  }
+  .dev-social-row{display:flex; gap:9px; margin-bottom:18px;}
+  .dev-social-btn{
+    flex:1; display:flex; flex-direction:column; align-items:center; gap:6px;
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:11px 6px; text-decoration:none; color:var(--text);
+    font-family:'IBM Plex Mono', monospace; font-size:10px; letter-spacing:.02em;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .dev-social-btn:hover{border-color:var(--accent-dim); background:var(--surface-hover);}
+  .dev-social-btn svg{width:18px; height:18px; flex-shrink:0; color:var(--accent);}
+  .dev-footer-row{
+    display:flex; align-items:center; justify-content:space-between;
+    font-family:'IBM Plex Mono', monospace; font-size:10.5px; color:var(--text-faint);
+    padding-top:2px;
+  }
+  .dev-version-tag{
+    background:var(--surface); border:1px solid var(--border); border-radius:999px;
+    padding:3px 9px; color:var(--text-muted); font-size:10px;
+  }
+  .about-dev-foot{padding:14px 26px 24px;}
+  .about-dev-foot .btn{width:100%;}
+
+  /* Botón en el sidebar */
+  .sidebar-about-link{
+    display:flex; align-items:center; gap:6px; margin-top:8px;
+    background:none; border:none; cursor:pointer; padding:0;
+    font-family:'IBM Plex Mono', monospace; font-size:10px; letter-spacing:.04em;
+    color:var(--text-faint); transition:color .15s ease;
+  }
+  .sidebar-about-link:hover{color:var(--accent);}
+
+  /* Crédito persistente al pie del contenido */
+  .dev-footer-credit{
+    display:flex; align-items:center; justify-content:center; gap:6px;
+    margin:30px 0 10px; padding:12px 14px;
+    background:var(--surface); border:1px solid var(--border-soft);
+    border-radius:var(--radius); cursor:pointer;
+    font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--text-faint);
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .dev-footer-credit:hover{border-color:var(--accent-dim); color:var(--text-muted);}
+  .dev-footer-credit strong{color:var(--accent); font-weight:600;}
+
   /* ---------- BOTÓN Y PANEL DE EMERGENCIA ---------- */
   .sos-button{
     position:fixed; right:16px; bottom:16px; z-index:900;
@@ -1130,6 +1212,7 @@
     <div class="sidebar-footer">
       <span class="status-dot"></span>SISTEMA OPERATIVO · V1.0<br>
       <span style="opacity:.75;">Contenido educativo. No reemplaza entrenamiento profesional ni servicios de emergencia.</span>
+      <button class="sidebar-about-link" onclick="openAboutDev()">ⓘ Acerca del desarrollador</button>
     </div>
   </aside>
 
@@ -1145,6 +1228,10 @@
     </header>
 
     <div class="content" id="content"></div>
+
+    <div class="dev-footer-credit" onclick="openAboutDev()">
+      💻 Hecho por <strong>Bruno Fiorucci</strong>
+    </div>
   </main>
 </div>
 
@@ -1211,6 +1298,53 @@
         <input type="checkbox" id="welcomeDontShow"> No volver a mostrar este tutorial
       </label>
       <button class="btn" id="welcomeStartBtn">Empezar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Acerca del desarrollador -->
+<div class="about-dev-overlay" id="aboutDevOverlay">
+  <div class="about-dev-modal">
+
+    <div class="about-dev-head">
+      <div class="dev-avatar-wrap">
+        <!-- 📸 Reemplazá src por la foto real del desarrollador (o dejá el placeholder con iniciales) -->
+        <div class="dev-avatar" id="devAvatar">
+          <!-- <img src="TU_FOTO_AQUI.jpg" alt="Bruno Fiorucci" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"> -->
+          BF
+        </div>
+      </div>
+      <h2>👨‍💻 Bruno Fiorucci</h2>
+      <div class="dev-role">Desarrollador de aplicaciones web</div>
+    </div>
+
+    <div class="about-dev-body">
+      <!-- ✏️ Editá este texto de presentación libremente -->
+      <p class="dev-bio">Apasionado por crear herramientas simples y útiles. SurvivalAI nació de las ganas de unir tecnología y conocimiento práctico para que cualquiera pueda estar mejor preparado.</p>
+
+      <div class="dev-social-row">
+        <a class="dev-social-btn" href="https://instagram.com/Fiorucci.Dev" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>
+          Instagram
+        </a>
+        <a class="dev-social-btn" href="https://github.com/brunofiorucci" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.73.5.5 5.73.5 12c0 5.08 3.29 9.39 7.86 10.91.57.1.78-.25.78-.55 0-.27-.01-1.16-.02-2.1-3.2.7-3.88-1.36-3.88-1.36-.52-1.34-1.28-1.7-1.28-1.7-1.04-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11.05 11.05 0 0 1 5.78 0c2.21-1.5 3.18-1.18 3.18-1.18.63 1.6.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.43-2.7 5.4-5.27 5.69.42.36.78 1.08.78 2.17 0 1.57-.01 2.83-.01 3.22 0 .3.2.66.79.55A10.52 10.52 0 0 0 23.5 12C23.5 5.73 18.27.5 12 .5z"/></svg>
+          GitHub
+        </a>
+        <a class="dev-social-btn" href="mailto:brunofiorucci8@gmail.com" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2.5" y="4.5" width="19" height="15" rx="3"/><path d="M3 6.5l9 6.5 9-6.5"/></svg>
+          Email
+        </a>
+      </div>
+
+      <div class="dev-footer-row">
+        <span>© <span id="devCopyrightYear">2026</span> Bruno Fiorucci</span>
+        <span class="dev-version-tag" id="devVersionTag">v1.0.0</span>
+      </div>
+    </div>
+
+    <div class="about-dev-foot">
+      <button class="btn btn-ghost" onclick="closeAboutDev()">Cerrar</button>
     </div>
   </div>
 </div>
@@ -5957,6 +6091,33 @@ if(expeditionModalOverlay){
 /* ---------- MODAL DE BIENVENIDA / TUTORIAL ---------- */
 
 const WELCOME_STORAGE_KEY = 'survivalai_welcome_seen';
+
+/* ---------- ACERCA DEL DESARROLLADOR ---------- */
+// ✏️ Editá esta constante cuando publiques una nueva versión de la app
+const APP_VERSION = '1.0.0';
+
+function openAboutDev(){
+  const overlay = document.getElementById('aboutDevOverlay');
+  if(!overlay) return;
+  document.getElementById('devVersionTag').textContent = 'v' + APP_VERSION;
+  document.getElementById('devCopyrightYear').textContent = new Date().getFullYear();
+  overlay.classList.add('open');
+}
+function closeAboutDev(){
+  const overlay = document.getElementById('aboutDevOverlay');
+  if(!overlay) return;
+  overlay.classList.remove('open');
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const overlay = document.getElementById('aboutDevOverlay');
+  if(overlay){
+    overlay.addEventListener('click', e => { if(e.target === overlay) closeAboutDev(); });
+  }
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape' && overlay && overlay.classList.contains('open')) closeAboutDev();
+  });
+});
+
 
 function mostrarBienvenida(){
   const overlay = document.getElementById('welcomeModalOverlay');
