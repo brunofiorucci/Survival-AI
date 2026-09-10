@@ -675,6 +675,61 @@
   }
   .stat-track{height:6px; background:var(--bg-elevated); border-radius:3px; overflow:hidden;}
   .stat-fill{height:100%; transition:width .3s ease;}
+  /* TEST DE TRIVIA ZOMBIE */
+  .quiz-intro-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:26px; max-width:560px;
+  }
+  .quiz-intro-card p{color:var(--text-muted); font-size:13.5px; line-height:1.7; margin:0 0 16px;}
+  .quiz-intro-stats{
+    display:flex; gap:18px; flex-wrap:wrap; margin:0 0 20px;
+    font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--text-faint);
+  }
+  .quiz-intro-stats b{color:var(--text); font-size:15px; display:block; font-family:'Oswald', sans-serif;}
+  .quiz-history{margin-top:24px; padding-top:18px; border-top:1px solid var(--border-soft);}
+  .quiz-history h4{
+    font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--text-faint); margin:0 0 10px;
+  }
+  .quiz-history-item{
+    display:flex; justify-content:space-between; gap:10px; font-size:12px; color:var(--text-muted);
+    padding:6px 0; border-bottom:1px solid var(--border-soft);
+  }
+  .quiz-history-item:last-child{border-bottom:none;}
+  .quiz-progress-bar{height:5px; background:var(--bg-elevated); border-radius:3px; overflow:hidden; margin-bottom:16px;}
+  .quiz-progress-fill{height:100%; background:var(--accent); transition:width .25s ease;}
+  .quiz-panel{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:22px; max-width:640px;
+  }
+  .quiz-meta{
+    display:flex; justify-content:space-between; font-family:'IBM Plex Mono', monospace;
+    font-size:10.5px; color:var(--text-faint); letter-spacing:.05em; text-transform:uppercase; margin-bottom:10px;
+  }
+  .quiz-question{font-size:15px; line-height:1.6; margin:0 0 18px; font-weight:500;}
+  .quiz-options{display:flex; flex-direction:column; gap:9px;}
+  .quiz-option-btn{
+    text-align:left; background:var(--bg-elevated); border:1px solid var(--border); color:var(--text);
+    padding:12px 14px; border-radius:var(--radius); font-size:13.5px; cursor:pointer;
+    font-family:'Inter', sans-serif; transition:border-color .15s, background .15s;
+  }
+  .quiz-option-btn:hover:not(:disabled){border-color:var(--accent); background:var(--surface-hover);}
+  .quiz-option-btn:disabled{cursor:default;}
+  .quiz-option-btn.correct{border-color:var(--safe); background:var(--safe-bg); color:var(--safe);}
+  .quiz-option-btn.incorrect{border-color:var(--danger); background:var(--danger-bg); color:var(--danger);}
+  .quiz-next-row{margin-top:18px; display:flex; justify-content:flex-end;}
+  .quiz-result{text-align:center; padding:10px 0;}
+  .quiz-result .quiz-score{
+    font-family:'Oswald', sans-serif; font-size:38px; font-weight:600; margin:0 0 6px;
+  }
+  .quiz-result h3{
+    font-family:'Oswald', sans-serif; font-size:20px; text-transform:uppercase; margin:0 0 12px; letter-spacing:.02em;
+  }
+  .quiz-result.good .quiz-score, .quiz-result.good h3{color:var(--safe);}
+  .quiz-result.mid .quiz-score, .quiz-result.mid h3{color:var(--warn);}
+  .quiz-result.bad .quiz-score, .quiz-result.bad h3{color:var(--danger);}
+  .quiz-result p{color:var(--text-muted); font-size:13.5px; line-height:1.7; max-width:480px; margin:0 auto 22px;}
+  .quiz-result-actions{display:flex; gap:10px; justify-content:center; flex-wrap:wrap;}
   .sim-log{
     margin-top:16px; padding-top:14px; border-top:1px solid var(--border-soft);
     font-size:10.5px; color:var(--text-faint); font-family:'IBM Plex Mono', monospace;
@@ -1381,6 +1436,12 @@ const ICONS = {
   pesca: '<path d="M2 12 C6 12 8 6 14 6 C19 6 22 9 22 12 C22 15 19 18 14 18 C8 18 6 12 2 12 Z" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/><circle cx="15.5" cy="11" r="1" fill="currentColor"/><path d="M2 12 L5 9 M2 12 L5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>',
   caza: '<circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="12" cy="12" r="4.5" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="12" cy="12" r="1" fill="currentColor"/><path d="M12 1 V5 M12 19 V23 M1 12 H5 M19 12 H23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
   recoleccion: '<path d="M4 10 H20 L18 20 A2 2 0 0 1 16 22 H8 A2 2 0 0 1 6 20 Z" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/><path d="M4 10 C4 10 6 3 12 3 C18 3 20 10 20 10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M8 10 V14 M12 10 V15 M16 10 V14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>',
+  apocalipsis_zombie_refugio: '<path d="M12 3 C7 3 4 6.5 4 11 C4 14 5.5 16 7 17.3 V20 A1 1 0 0 0 8 21 H9 V18.5 H10.5 V21 H13.5 V18.5 H15 V21 H16 A1 1 0 0 0 17 20 V17.3 C18.5 16 20 14 20 11 C20 6.5 17 3 12 3 Z" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><circle cx="9" cy="11" r="1.6" fill="currentColor"/><circle cx="15" cy="11" r="1.6" fill="currentColor"/><path d="M9.5 14.5 H14.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>',
+  apocalipsis_zombie_movimiento: '<circle cx="12" cy="4.5" r="2" stroke="currentColor" stroke-width="2" fill="none"/><path d="M9 9.5 L6.5 15 L8.5 21 M15 9.5 L17 14 L13.5 21 M9 9.5 H15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+  apocalipsis_zombie_grupo: '<circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="16" cy="8" r="3" stroke="currentColor" stroke-width="2" fill="none"/><path d="M3 20 C3 16 5.2 14 8 14 C10.8 14 13 16 13 20 M11 20 C11 16.5 13 15 16 15 C19 15 21 17 21 20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>',
+  apocalipsis_zombie_prepararse: '<rect x="5" y="4" width="14" height="17" rx="1.5" stroke="currentColor" stroke-width="2" fill="none"/><path d="M9 3 H15 V6 H9 Z" fill="currentColor"/><path d="M8 11 L10 13 L14 9 M8 16 L10 18 L14 14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+  apocalipsis_zombie_armas: '<path d="M4 20 L14 10 M12 6 L18 12 M10 8 L16 14 M15 4 L20 9" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+  zombie_test: '<rect x="5" y="3" width="14" height="18" rx="1.5" stroke="currentColor" stroke-width="2" fill="none"/><path d="M9 2.5 H15 V5 H9 Z" fill="currentColor"/><path d="M8 10 H16 M8 13.5 H16 M8 17 H13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>',
   mochila: '<path d="M7 8 V6 a5 5 0 0 1 10 0 v2 M5 8 H19 L20 21 H4 Z" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/>',
   ia: '<circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2" fill="none"/><path d="M12 3 V6 M12 18 V21 M3 12 H6 M18 12 H21 M5.6 5.6 L7.8 7.8 M16.2 16.2 L18.4 18.4 M18.4 5.6 L16.2 7.8 M7.8 16.2 L5.6 18.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
   simulador: '<circle cx="6" cy="6" r="2.2" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="6" cy="18" r="2.2" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="18" cy="12" r="2.2" stroke="currentColor" stroke-width="2" fill="none"/><path d="M8 7 L16 11 M8 17 L16 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
@@ -2445,6 +2506,426 @@ const DATA = {
         ]
       }
     ]
+  },
+
+  apocalipsis_zombie_refugio: {
+    titulo: 'Refugio y Barricadas',
+    eyebrow: 'MÓDULO 14 — REFUGIO ZOMBIE',
+    descripcion: 'Guía temática de fan, ambientada en un escenario ficticio de apocalipsis zombie: cómo elegir un refugio defendible y resistir el asedio de una horda.',
+    items: [
+      {
+        id: 'zombie-eleccion-refugio',
+        nombre: 'Elegir un refugio defendible',
+        resumen: 'Qué características buscar en un lugar para atrincherarte durante un brote, según el género zombie.',
+        nivel: 'medio',
+        etiquetas: ['ficción', 'refugio', 'brote'],
+        pasos: [
+          'Priorizá lugares con pocos puntos de entrada: una sola puerta accesible es más fácil de vigilar y sellar que un edificio con muchas aberturas.',
+          'Buscá altura o un segundo piso con escalera retráctil: los infectados de la ficción clásica no suelen poder trepar ni usar escaleras.',
+          'Confirmá que haya al menos dos vías de escape distintas por si el refugio principal queda comprometido.',
+          'Revisá el entorno inmediato en busca de fuentes de agua y comida cercanas para no depender de salidas largas y riesgosas.',
+          'Evitá plantas bajas con vidrieras o ventanales grandes hacia la calle: son el primer punto por donde cede cualquier barricada.'
+        ]
+      },
+      {
+        id: 'zombie-barricadas',
+        nombre: 'Barricadas y puntos de entrada',
+        resumen: 'Cómo reforzar accesos de forma narrativa-realista para resistir el asedio de una horda.',
+        nivel: 'medio',
+        etiquetas: ['ficción', 'barricada', 'defensa'],
+        pasos: [
+          'Reforzá puertas con muebles pesados apoyados en diagonal, no de frente: reparten mejor la fuerza de un empuje sostenido.',
+          'Cubrí ventanas bajas con tablas cruzadas en cruz, no en paralelo, para que no puedan quitarse con un solo tirón.',
+          'Dejá una "vía de escape secreta" que solo tu grupo conozca, alejada de la entrada principal más vigilada.',
+          'Instalá alarmas improvisadas y ruidosas (latas colgadas, botellas) en accesos secundarios para detectar intrusiones antes de que lleguen a la puerta principal.',
+          'Revisá y reforzá las barricadas todos los días: en la ficción, el desgaste silencioso es lo que suele fallar primero, no el ataque directo.'
+        ]
+      },
+      {
+        id: 'zombie-vigilancia-turnos',
+        nombre: 'Puestos de vigilancia y turnos',
+        resumen: 'Cómo organizar la vigilancia del refugio para detectar una horda antes de que llegue a la puerta.',
+        nivel: 'bajo',
+        etiquetas: ['ficción', 'vigilancia', 'organización'],
+        pasos: [
+          'Elegí un punto alto con vista despejada hacia el acceso más probable de una horda (calle principal, camino, claro).',
+          'Turnate la guardia en bloques cortos: la atención baja mucho después de la primera hora sin descanso.',
+          'Definí una señal simple y silenciosa (golpes, luces) para avisar al resto del grupo sin gritar.',
+          'Llevá siempre binoculares o algo para ver de lejos, si el grupo consiguió alguno: detectar temprano es la diferencia entre prepararse y improvisar.',
+          'Nunca dejes el puesto de guardia sin avisar a nadie, ni siquiera "un minuto": es el error clásico que en la ficción termina mal.'
+        ]
+      },
+      {
+        id: 'zombie-techos-conectados',
+        nombre: 'Usar techos y azoteas conectadas',
+        resumen: 'En entornos urbanos densos, moverse por arriba puede ser más seguro que hacerlo a nivel de calle.',
+        nivel: 'medio',
+        etiquetas: ['ficción', 'refugio', 'urbano'],
+        pasos: [
+          'Explorá si tu edificio tiene acceso a techos o azoteas conectadas con construcciones vecinas.',
+          'Usá esas conexiones como ruta alternativa para moverte sin cruzar la calle a nivel del suelo.',
+          'Asegurá bien cualquier escalera o pasarela improvisada que uses para pasar de un techo a otro.',
+          'Evitá dejar objetos visibles desde abajo que delaten que el techo está ocupado.',
+          'Tené en cuenta el viento y la lluvia: una azotea resbaladiza es un riesgo extra que no existe adentro.'
+        ]
+      },
+      {
+        id: 'zombie-refugio-subterraneo',
+        nombre: 'Refugios subterráneos: ventajas y riesgos',
+        resumen: 'Sótanos y túneles ofrecen sigilo, pero también tienen desventajas propias del género que conviene conocer.',
+        nivel: 'alto',
+        etiquetas: ['ficción', 'refugio', 'riesgo'],
+        pasos: [
+          'Valorá que un sótano bien oculto es difícil de encontrar y aísla mucho el ruido hacia el exterior.',
+          'Tené siempre presente que un espacio subterráneo suele tener una sola salida, lo que lo vuelve una trampa si esa salida se bloquea.',
+          'Priorizá los que tengan alguna salida secundaria, aunque sea angosta, como ventilación o escotilla.',
+          'Llevá siempre luz propia: la ficción suele mostrar que la electricidad es de las primeras cosas en fallar.',
+          'Marcá el camino de salida en la oscuridad total, por si hay que evacuar sin luz.'
+        ]
+      }
+    ]
+  },
+
+  apocalipsis_zombie_movimiento: {
+    titulo: 'Sigilo y Salidas',
+    eyebrow: 'MÓDULO 15 — MOVIMIENTO ZOMBIE',
+    descripcion: 'Cómo moverte, buscar suministros y planear rutas de escape en zona infestada, según los tropos clásicos del género.',
+    items: [
+      {
+        id: 'zombie-sigilo-ruido',
+        nombre: 'Sigilo y disciplina de ruido',
+        resumen: 'En casi toda ficción de zombies, el sonido atrae a los infectados más que la vista o el olfato.',
+        nivel: 'bajo',
+        etiquetas: ['ficción', 'sigilo', 'movimiento'],
+        pasos: [
+          'Moveté despacio y pegado a paredes o vehículos para reducir tu silueta y el ruido de tus pasos.',
+          'Evitá correr salvo que sea estrictamente necesario: el ruido de una carrera se escucha mucho más lejos que caminar con cuidado.',
+          'Silenciá objetos sueltos (llaves, cadenas, mochilas mal cerradas) antes de cualquier salida.',
+          'Si necesitás distraer a una horda, usá un ruido lejano (una piedra contra una lata, una radio) para desviarla de tu ruta real.',
+          'Comuniquense con señas o susurros en zona infestada; hablar en voz normal es de los errores más comunes en el género.'
+        ]
+      },
+      {
+        id: 'zombie-salidas-suministros',
+        nombre: 'Salidas de recolección de suministros',
+        resumen: 'Cómo planificar una incursión corta a zona infestada para buscar comida, agua o medicinas.',
+        nivel: 'alto',
+        etiquetas: ['ficción', 'logística', 'riesgo'],
+        pasos: [
+          'Salí siempre con un objetivo concreto y una lista corta: quedarse "improvisando" adentro de un edificio infestado es lo que más se castiga en cualquier historia del género.',
+          'Marcá un límite de tiempo antes de salir y respetalo aunque no hayas conseguido todo lo que buscabas.',
+          'Llevá siempre un compañero que cubra la retirada mientras el otro recolecta.',
+          'Priorizá edificios pequeños y de layout simple (farmacias, kioscos) antes que estructuras grandes y laberínticas como supermercados o depósitos.',
+          'Al volver, revisen entre todos que nadie tenga heridas o mordeduras antes de reingresar al refugio.'
+        ]
+      },
+      {
+        id: 'zombie-rutas-escape',
+        nombre: 'Rutas de escape y puntos de encuentro',
+        resumen: 'Planificar de antemano cómo y dónde reagruparse si algo sale mal durante una salida.',
+        nivel: 'medio',
+        etiquetas: ['ficción', 'planificación', 'grupo'],
+        pasos: [
+          'Definí siempre dos rutas distintas de ida y vuelta antes de salir: si una se llena de infectados, tenés un plan B ya pensado.',
+          'Acordá con el grupo un punto de encuentro fijo, fácil de describir, por si alguien se separa durante una salida.',
+          'Si tienen vehículo, dejalo apuntando hacia la salida y con las llaves accesibles, nunca de espaldas a la ruta de escape.',
+          'Establezcan un tiempo límite de espera en el punto de encuentro antes de asumir que hay que seguir sin esa persona.',
+          'Eviten pasajes angostos o callejones sin salida como ruta principal, aunque parezcan un atajo más corto.'
+        ]
+      },
+      {
+        id: 'zombie-vehiculos-bicicleta',
+        nombre: 'Vehículos, bicicletas y consumo de nafta',
+        resumen: 'Elegir el medio de transporte adecuado según ruido, velocidad y combustible disponible.',
+        nivel: 'medio',
+        etiquetas: ['ficción', 'vehículos', 'logística'],
+        pasos: [
+          'Preferí la bicicleta para trayectos cortos y sigilosos: no hace ruido de motor y no depende de combustible.',
+          'Reservá los vehículos a motor para distancias largas o cargas pesadas, calculando el consumo según el modelo y los kilómetros reales a recorrer.',
+          'Llevá siempre una estimación de cuánta nafta queda en el tanque antes de planear una ruta larga.',
+          'Mantené el volumen de radio o motor lo más bajo posible al pasar cerca de zonas con posible actividad.',
+          'Revisá el estado de neumáticos y frenos antes de cualquier salida, tanto en bici como en auto, para no quedar varado en zona de riesgo.'
+        ]
+      },
+      {
+        id: 'zombie-clima-desplazamiento',
+        nombre: 'Cómo afecta el clima al desplazamiento',
+        resumen: 'Lluvia, niebla o calor extremo cambian por completo el riesgo de moverse por zona infestada.',
+        nivel: 'medio',
+        etiquetas: ['ficción', 'clima', 'movimiento'],
+        pasos: [
+          'Usá la lluvia fuerte a tu favor: el sonido del agua enmascara pasos y ruidos menores, aunque también reduce tu propia percepción.',
+          'Evitá salidas largas con niebla densa: perdés visibilidad para detectar tanto infectados como obstáculos.',
+          'En días de calor extremo, planificá salidas más cortas y llevá más agua de la habitual.',
+          'El barro y el hielo aumentan el riesgo de caídas durante una huida; elegí calzado con buen agarre.',
+          'Revisá el pronóstico si tenés forma de hacerlo: una tormenta a mitad de una salida larga puede complicar mucho el regreso.'
+        ]
+      }
+    ]
+  },
+
+  apocalipsis_zombie_grupo: {
+    titulo: 'Grupo, Protocolos e Infección',
+    eyebrow: 'MÓDULO 16 — GRUPO ZOMBIE',
+    descripcion: 'Protocolos de revisión, señales de alerta y convivencia grupal: la dinámica de grupo suele decidir más historias del género que los infectados en sí.',
+    items: [
+      {
+        id: 'zombie-protocolo-mordedura',
+        nombre: 'Protocolo de revisión post-salida',
+        resumen: 'El chequeo clásico que todo grupo de ficción hace al volver de zona de riesgo, antes de bajar la guardia.',
+        nivel: 'medio',
+        etiquetas: ['ficción', 'protocolo', 'grupo'],
+        pasos: [
+          'Revisen la piel expuesta de cada persona (brazos, cuello, piernas) buscando marcas, arañazos o mordeduras antes de entrar al refugio.',
+          'Mantengan a la persona revisada afuera o en una zona aislada del refugio hasta confirmar que está bien.',
+          'Definan de antemano, como grupo, qué protocolo van a seguir ante una mordedura confirmada: es una decisión que en la ficción siempre es mejor hablarla antes de que pase, no en el momento.',
+          'Registren cualquier síntoma raro (fiebre, mareos) los días siguientes a una salida, aunque no haya mordedura visible.',
+          'Eviten el pánico grupal: en la mayoría de las historias, las peores decisiones se toman por miedo colectivo más que por el peligro real.'
+        ]
+      },
+      {
+        id: 'zombie-señales-infeccion',
+        nombre: 'Señales tempranas de infección (según la ficción)',
+        resumen: 'Los síntomas clásicos que usa el género para marcar que alguien empieza a transformarse, útiles para reconocerlos en una historia o juego.',
+        nivel: 'medio',
+        etiquetas: ['ficción', 'infección', 'reconocimiento'],
+        pasos: [
+          'En la mayoría de las historias, la fiebre alta y la sudoración excesiva son los primeros signos que aparecen tras una mordedura.',
+          'Los cambios de conducta (agresividad repentina, confusión, aislamiento) suelen anticiparse a los síntomas físicos más evidentes.',
+          'La decoloración de venas cerca de la herida y una palidez creciente son un recurso visual típico del género para marcar el avance.',
+          'La pérdida de coordinación motriz y el habla cada vez más lenta suelen marcar las últimas horas antes de la transformación completa.',
+          'Ante cualquier sospecha, la mayoría de las historias coinciden en lo mismo: aislar rápido y con calma es mejor que negar lo que está pasando.'
+        ]
+      },
+      {
+        id: 'zombie-reglas-grupo',
+        nombre: 'Reglas básicas de convivencia en grupo',
+        resumen: 'La dinámica de grupo suele ser, en la ficción, más determinante para sobrevivir que los infectados en sí.',
+        nivel: 'bajo',
+        etiquetas: ['ficción', 'grupo', 'organización'],
+        pasos: [
+          'Definan roles claros (vigilancia, recolección, mantenimiento del refugio) y rótenlos para que nadie se queme con una sola tarea.',
+          'Establezcan turnos de guardia nocturna fijos, aunque el grupo sea chico.',
+          'Racionen los suministros desde el primer día, no esperen a que escaseen para empezar a cuidar el consumo.',
+          'Tomen decisiones importantes en conjunto: en casi toda historia del género, los liderazgos autoritarios no consultados terminan mal para el grupo.',
+          'Reserven un espacio y un momento del día para hablar de algo que no sea la supervivencia: ayuda a sostener la cohesión del grupo a largo plazo.'
+        ]
+      },
+      {
+        id: 'zombie-moral-liderazgo',
+        nombre: 'Moral, liderazgo y toma de decisiones',
+        resumen: 'Cómo sostener la moral del grupo y tomar decisiones difíciles sin que el liderazgo se vuelva un problema en sí mismo.',
+        nivel: 'medio',
+        etiquetas: ['ficción', 'liderazgo', 'moral'],
+        pasos: [
+          'Mantené comunicación honesta sobre el estado real de los recursos, aunque las noticias no sean buenas: ocultarlas suele salir peor a largo plazo.',
+          'Consultá las decisiones importantes con el grupo en vez de imponerlas: genera más compromiso con el resultado.',
+          'Dejá un espacio para procesar pérdidas o malas noticias antes de exigir que el grupo "siga funcionando" de inmediato.',
+          'Definí de antemano quién toma el mando si el líder queda incapacitado, para evitar el caos en el peor momento.',
+          'Reconocé los errores del grupo en conjunto en vez de buscar un solo culpable: ayuda a aprender sin romper la cohesión.'
+        ]
+      },
+      {
+        id: 'zombie-nuevos-miembros',
+        nombre: 'Sumar nuevos sobrevivientes al grupo',
+        resumen: 'Incorporar gente nueva puede fortalecer al grupo, pero también es uno de los riesgos clásicos del género.',
+        nivel: 'alto',
+        etiquetas: ['ficción', 'grupo', 'riesgo'],
+        pasos: [
+          'Evaluá con cautela a cualquier sobreviviente nuevo antes de darle acceso total al refugio.',
+          'Observá su comportamiento y su historia en busca de inconsistencias, un recurso narrativo clásico para detectar problemas.',
+          'Decidí la incorporación en conjunto con el grupo, no de forma unilateral.',
+          'Aplicá el mismo protocolo de revisión por posibles mordeduras que usarías con cualquier otro miembro.',
+          'Dale tiempo antes de confiarle roles críticos como la vigilancia nocturna en solitario.'
+        ]
+      }
+    ]
+  },
+
+  apocalipsis_zombie_prepararse: {
+    titulo: 'Cómo Prepararse',
+    eyebrow: 'MÓDULO 17 — PREPARACIÓN ZOMBIE',
+    descripcion: 'Guía de fan sobre cómo prepararte antes de que empiece un brote ficticio: qué armar, qué planificar y qué acordar con tu grupo con anticipación.',
+    items: [
+      {
+        id: 'zombie-kit-evacuacion',
+        nombre: 'Armar un kit de evacuación (bug-out bag)',
+        resumen: 'Una mochila lista para salir en minutos si el refugio deja de ser seguro, un clásico de la preparación del género.',
+        nivel: 'medio',
+        etiquetas: ['ficción', 'preparación', 'kit'],
+        pasos: [
+          'Armá una mochila aparte, siempre lista y en un lugar fijo, que nadie use para otra cosa que no sea una evacuación de emergencia.',
+          'Priorizá lo liviano y multipropósito: agua, algo de comida no perecedera, linterna, botiquín básico y una muda de ropa.',
+          'Sumá una copia de documentos importantes y algo de dinero en efectivo, por si los sistemas electrónicos dejan de funcionar.',
+          'Revisá y renová el contenido (pilas, comida, agua) cada tanto, para que el kit siga sirviendo si hace falta usarlo.',
+          'Practicá agarrar la mochila y salir en menos de un minuto: en la ficción, el tiempo que se pierde buscando cosas es lo que más cuesta.'
+        ]
+      },
+      {
+        id: 'zombie-plan-rutas',
+        nombre: 'Plan de rutas y puntos de encuentro previos',
+        resumen: 'Acordar de antemano, antes de que pase cualquier cosa, cómo se reagrupa tu gente si se separan.',
+        nivel: 'bajo',
+        etiquetas: ['ficción', 'preparación', 'planificación'],
+        pasos: [
+          'Elegí con tu grupo dos o tres puntos de encuentro conocidos por todos, ordenados de más cercano a más lejano.',
+          'Marcá con anticipación al menos dos rutas distintas desde tu casa o trabajo hacia esos puntos, evitando cuellos de botella como puentes únicos.',
+          'Definan una regla simple de "si nos separamos": a dónde ir primero y cuánto tiempo esperar antes de seguir al siguiente punto.',
+          'Guardá copias físicas del plan (mapa en papel) además de digitales: la ficción del género suele mostrar que la tecnología es lo primero que falla.',
+          'Revisen el plan como grupo cada tanto, sobre todo si cambia alguna dirección o rutina habitual.'
+        ]
+      },
+      {
+        id: 'zombie-preparacion-fisica-mental',
+        nombre: 'Preparación física y mental preventiva',
+        resumen: 'La condición física y la calma bajo presión son, en casi toda historia del género, más decisivas que cualquier arma.',
+        nivel: 'medio',
+        etiquetas: ['ficción', 'preparación', 'entrenamiento'],
+        pasos: [
+          'Sostené una rutina básica de resistencia (caminar, trotar) para poder moverte rápido y por más tiempo si hace falta.',
+          'Practicá primeros auxilios reales: es la habilidad que más se repite como decisiva en cualquier historia de supervivencia, ficticia o no.',
+          'Entrená mentalmente escenarios simples de decisión rápida, para no paralizarte ante una situación de estrés.',
+          'Fomentá la calma antes que la fuerza: en la ficción, los personajes que sobreviven más tiempo suelen ser los que piensan antes de reaccionar.',
+          'Conocé bien tu propio entorno (barrio, casa, rutas) de antemano: es una ventaja que ningún entrenamiento físico reemplaza.'
+        ]
+      },
+      {
+        id: 'zombie-inventario-suministros',
+        nombre: 'Inventario y rotación de suministros a largo plazo',
+        resumen: 'Cómo mantener reservas útiles en el tiempo, para un escenario donde el brote dura semanas o meses.',
+        nivel: 'medio',
+        etiquetas: ['ficción', 'preparación', 'logística'],
+        pasos: [
+          'Llevá un inventario simple y actualizado de lo que tenés guardado: en la ficción, no saber qué reservas quedan suele ser tan grave como no tener reservas.',
+          'Rotá la comida y el agua almacenada por fecha, usando primero lo más próximo a vencer.',
+          'Diversificá el almacenamiento en más de un lugar del refugio, por si una zona queda inaccesible.',
+          'Priorizá reservas de agua e insumos médicos por sobre la comida: duran más y son más críticos a corto plazo.',
+          'Sumá algo de trueque potencial (elementos útiles pero no imprescindibles) pensando en otros grupos con los que puedan cruzarse.'
+        ]
+      },
+      {
+        id: 'zombie-refugio-anticipado',
+        nombre: 'Elegir tu refugio con anticipación',
+        resumen: 'Explorar y evaluar posibles refugios antes de necesitarlos, en vez de improvisar en el momento.',
+        nivel: 'bajo',
+        etiquetas: ['ficción', 'preparación', 'refugio'],
+        pasos: [
+          'Identificá de antemano dos o tres lugares posibles en tu zona que cumplan las características de un buen refugio defendible.',
+          'Anotá mentalmente o en tu plan cómo llegar a cada uno desde distintos puntos (casa, trabajo, escuela).',
+          'Fijate si esos lugares tienen accesos a agua, altura o pocos puntos de entrada, sin necesidad de visitarlos con sospecha.',
+          'Conversá con tu grupo cuál sería el refugio "por defecto" si no pueden comunicarse para decidir en el momento.',
+          'Actualizá esta lista de tanto en tanto: un lugar que servía puede dejar de ser una buena opción con el tiempo.'
+        ]
+      },
+      {
+        id: 'zombie-mitos-realidad',
+        nombre: 'Mitos del género vs. preparación real',
+        resumen: 'Qué de esta guía temática es pura ficción y qué principios se apoyan en preparación real ante emergencias.',
+        nivel: 'bajo',
+        etiquetas: ['ficción', 'mitos', 'preparación real'],
+        pasos: [
+          'Recordá siempre que un virus capaz de "reanimar" no tiene base científica: es un recurso narrativo del género.',
+          'Muchas técnicas de esta guía (kit de evacuación, plan de rutas, roles de grupo) se inspiran en preparación real ante desastres naturales.',
+          'Hervir o purificar agua de fuente dudosa sí es una práctica real recomendada, más allá de cualquier ficción.',
+          'Tener un plan familiar de evacuación y un punto de encuentro es una recomendación real de defensa civil en muchos países.',
+          'Usá esta guía como entretenimiento temático: para preparación real ante emergencias, consultá siempre fuentes oficiales.'
+        ]
+      },
+      {
+        id: 'zombie-kit-botiquin-ficcion',
+        nombre: 'Botiquín ampliado para un brote prolongado',
+        resumen: 'Qué sumar al botiquín básico si la ficción plantea semanas o meses sin acceso a un hospital.',
+        nivel: 'medio',
+        etiquetas: ['ficción', 'preparación', 'botiquín'],
+        pasos: [
+          'Sumá vendas y gasas en cantidad mayor a la de un botiquín cotidiano: las heridas se repiten más seguido en un escenario de brote largo.',
+          'Incluí algún manual básico de primeros auxilios en papel, por si nadie del grupo tiene formación médica.',
+          'Guardá los medicamentos de uso habitual del grupo con margen extra, rotándolos antes de que venzan.',
+          'Sumá elementos de higiene simples (jabón, alcohol) que en la ficción ayudan a evitar infecciones comunes, más allá de las mordeduras.',
+          'Revisá el botiquín después de cada uso para reponer lo gastado cuanto antes.'
+        ]
+      }
+    ]
+  },
+
+  apocalipsis_zombie_armas: {
+    titulo: 'Armas y Combate Improvisado',
+    eyebrow: 'MÓDULO 26 — ARMAS ZOMBIE',
+    descripcion: 'Guía temática de fan sobre combate cuerpo a cuerpo y armas improvisadas en un escenario ficticio de apocalipsis zombie.',
+    items: [
+      {
+        id: 'zombie-armas-cuerpo-a-cuerpo',
+        nombre: 'Elegir un arma cuerpo a cuerpo',
+        resumen: 'Qué buscar en un arma improvisada silenciosa para no atraer más infectados que los que ya enfrentás.',
+        nivel: 'medio',
+        etiquetas: ['ficción', 'armas', 'combate'],
+        pasos: [
+          'Priorizá armas de mango largo que permitan golpear manteniendo distancia del infectado.',
+          'Evitá depender de armas de fuego salvo emergencia extrema: el disparo hace ruido y puede atraer a toda una horda.',
+          'Buscá que el arma tenga buen agarre y no sea tan pesada como para cansarte en pocos golpes.',
+          'Probá su resistencia antes de depender de ella en una salida real: una falla en el momento crítico puede ser fatal.',
+          'Llevá siempre un arma de respaldo, por si la principal se rompe o se pierde en medio de un enfrentamiento.'
+        ]
+      },
+      {
+        id: 'zombie-clasificacion-armas',
+        nombre: 'Clasificación general de armas (según la ficción)',
+        resumen: 'Un repaso temático de las grandes categorías de armas que suelen aparecer en historias de apocalipsis zombie, y qué tan probable es encontrar cada una en una casa común.',
+        nivel: 'medio',
+        etiquetas: ['ficción', 'armas', 'clasificación'],
+        pasos: [
+          'Armas de caza: rifles y escopetas pensados originalmente para cazar animales (calibres civiles comunes en la ficción como .22 LR, .308 o escopetas calibre 12). Son las que más aparecen en casas de zonas rurales, aunque su disponibilidad real varía muchísimo según el país: lo que es común en una casa de Estados Unidos puede ser directamente ilegal de tener en Bolivia, Argentina u otros países con regulaciones más estrictas.',
+          'Armas de defensa personal: pistolas y revólveres de menor calibre, pensados para distancias cortas. En la ficción suelen ser escasas y muy valoradas por su tamaño y facilidad de transporte, aunque hacen ruido y llaman la atención igual que cualquier arma de fuego.',
+          'Armas de guerra o militares: fusiles de asalto y equipo táctico. En casi toda la ficción del género se presentan como las más raras de conseguir para un civil, y suelen aparecer recién cuando el grupo llega a un cuartel, comisaría o convoy militar abandonado.',
+          'Armas blancas: cuchillos, machetes, hachas y espadas. Son un clásico del género por ser silenciosas, no depender de munición y estar disponibles en casi cualquier casa, cocina o galpón.',
+          'Armas de combate cuerpo a cuerpo contundente: bates, palos, llaves de tuerca, martillos o barras. No cortan, pero golpean fuerte y son de las más fáciles de conseguir sin buscar mucho.',
+          'Armas caseras o improvisadas: en la ficción se arman combinando objetos cotidianos, como un palo de escoba con un cuchillo atado en la punta a modo de lanza, o una tabla con clavos. La idea narrativa central es el ingenio con lo que hay a mano, no la fabricación de algo complejo.',
+          'Recordá que esta clasificación es puramente temática para ambientar una historia de ficción: la tenencia, el tipo y la cantidad de armas permitidas varían enormemente de un país a otro, y esta guía no reemplaza ni reinterpreta ninguna legislación real sobre armas.'
+        ]
+      },
+      {
+        id: 'zombie-combate-tacticas',
+        nombre: 'Tácticas básicas de combate',
+        resumen: 'Cómo posicionarte y moverte para reducir el riesgo al enfrentar a uno o varios infectados.',
+        nivel: 'alto',
+        etiquetas: ['ficción', 'combate', 'táctica'],
+        pasos: [
+          'Buscá espacios angostos para pelear de a uno: limitan que te rodeen varios infectados a la vez.',
+          'Evitá quedar en un espacio abierto rodeado de infectados por todos lados.',
+          'Peleá siempre que puedas con un compañero cubriendo tu espalda.',
+          'Apuntá a la cabeza si tu escenario de ficción sigue ese tropo clásico para detener a un infectado.',
+          'Confirmá con cautela que un infectado esté realmente inmovilizado antes de acercarte a revisarlo.'
+        ]
+      },
+      {
+        id: 'zombie-evitar-combate',
+        nombre: 'Cuándo evitar el combate directo',
+        resumen: 'El mejor combate suele ser el que no sucede: cómo decidir cuándo retirarse en vez de pelear.',
+        nivel: 'medio',
+        etiquetas: ['ficción', 'estrategia', 'riesgo'],
+        pasos: [
+          'Evaluá siempre si podés retirarte antes de entrar en combate directo: cada enfrentamiento gasta energía y recursos.',
+          'Recordá que retirarse a tiempo no es debilidad: en la ficción, los personajes que sobreviven suelen ser los que eligen bien sus batallas.',
+          'Usá distracciones o rutas alternativas antes que la confrontación cuando el objetivo es solo pasar de largo.',
+          'Reservá el combate directo para cuando no haya otra opción, como proteger a alguien del grupo.',
+          'Después de un enfrentamiento, tratá cualquier herida propia de inmediato, aunque no sea una mordedura, para evitar infecciones comunes.'
+        ]
+      },
+      {
+        id: 'zombie-mantenimiento-armas',
+        nombre: 'Mantenimiento de armas improvisadas',
+        resumen: 'Un arma mal cuidada puede fallar justo cuando más se la necesita.',
+        nivel: 'bajo',
+        etiquetas: ['ficción', 'armas', 'mantenimiento'],
+        pasos: [
+          'Revisá que no tenga partes flojas que puedan ceder en un golpe.',
+          'Limpiala después de cada uso para evitar que se deteriore más rápido.',
+          'Guardala siempre en un lugar fijo y accesible, igual que la mochila de evacuación.',
+          'Sumá más de un arma disponible en el grupo, como respaldo si una falla.',
+          'Enseñá su uso básico a todo el grupo, no solo a quien la usa habitualmente.'
+        ]
+      }
+    ]
   }
 };
 
@@ -3197,7 +3678,7 @@ function cerrarResumenExpedicion(){
    NAVEGACIÓN Y RENDERIZADO
 ========================================================================= */
 
-const SECTION_KEYS = ['refugios','agua','fuego','orientacion','plantas','animales','primeros_auxilios','nudos','señales','comida','pesca','caza','recoleccion','mochila','ia','clima','gps','simulador','desafios','perfil','estadisticas'];
+const SECTION_KEYS = ['refugios','agua','fuego','orientacion','plantas','animales','primeros_auxilios','nudos','señales','comida','pesca','caza','recoleccion','apocalipsis_zombie_refugio','apocalipsis_zombie_movimiento','apocalipsis_zombie_grupo','apocalipsis_zombie_prepararse','apocalipsis_zombie_armas','zombie_test','mochila','ia','clima','gps','simulador','desafios','perfil','estadisticas'];
 
 let currentSection = 'refugios';
 let searchQuery = '';
@@ -3205,7 +3686,7 @@ let searchQuery = '';
 function buildNav(){
   const nav = document.getElementById('navList');
   nav.innerHTML = SECTION_KEYS.map((key, i) => {
-    const NAV_LABELS = { mochila: 'Mochila interactiva', ia: 'IA de supervivencia', clima: 'Clima', gps: 'GPS y mapa offline', simulador: 'Simulador de decisiones', desafios: 'Desafíos', perfil: 'Perfil del superviviente', estadisticas: 'Estadísticas' };
+    const NAV_LABELS = { mochila: 'Mochila interactiva', ia: 'IA de supervivencia', clima: 'Clima', gps: 'GPS y mapa offline', simulador: 'Simulador de decisiones', desafios: 'Desafíos', perfil: 'Perfil del superviviente', estadisticas: 'Estadísticas', zombie_test: 'Test zombie' };
     const label = NAV_LABELS[key] || (DATA[key] ? DATA[key].titulo : key);
     return `
       <div class="nav-item${key === currentSection ? ' active' : ''}" data-key="${key}" tabindex="0" role="button">
@@ -3293,7 +3774,7 @@ function renderGenericSection(key){
 /* ---------- MOCHILA INTERACTIVA ---------- */
 
 function renderMochilaSection(){
-  document.getElementById('sectionEyebrow').textContent = 'MÓDULO 14 — EQUIPO';
+  document.getElementById('sectionEyebrow').textContent = 'MÓDULO 18 — EQUIPO';
   document.getElementById('sectionTitle').textContent = 'Mochila interactiva';
   document.getElementById('sectionDesc').textContent = 'Armá tu lista de equipo, marcá lo que ya empacaste y controlá el peso total.';
   document.getElementById('toolbar').style.display = 'none';
@@ -3472,7 +3953,7 @@ const IA_RULES = [
   },
   {
     id: 'herida',
-    keywords: ['sangre','sangrando','herida','corte','lastimad','hemorragia'],
+    keywords: ['sangre','sangrando','sangra','herida','corte','lastim','hemorragia'],
     tag: 'PRIMEROS AUXILIOS',
     texto: 'Ante sangrado, la prioridad es controlar la hemorragia antes de pensar en cualquier otra cosa.',
     pasos: [
@@ -3573,7 +4054,7 @@ const IA_QUICK = [
 
 let iaState = {
   mensajes: [
-    { from: 'bot', html: '<span class="chat-tag">SURVIVAL AI</span>Contame tu situación (frío, sed, herida, perdido, animales, fuego...) y te doy los pasos a seguir, basados en el manual de campo. <br><br><small style="opacity:.7;">Esto es una guía educativa, no un servicio de emergencia. Ante una urgencia real, contactá a los servicios de rescate o emergencia de tu zona.</small>' }
+    { from: 'bot', html: '<span class="chat-tag">SURVIVAL AI</span>Elegí una situación de la lista y te doy los pasos a seguir, basados en el manual de campo. <br><br><small style="opacity:.7;">Esto es una guía educativa, no un servicio de emergencia. Ante una urgencia real, contactá a los servicios de rescate o emergencia de tu zona.</small>' }
   ]
 };
 
@@ -3642,9 +4123,9 @@ function iaGenerarRespuesta(inputRaw){
 }
 
 function renderIASection(){
-  document.getElementById('sectionEyebrow').textContent = 'MÓDULO 15 — ASISTENTE';
+  document.getElementById('sectionEyebrow').textContent = 'MÓDULO 19 — ASISTENTE';
   document.getElementById('sectionTitle').textContent = 'IA de supervivencia';
-  document.getElementById('sectionDesc').textContent = 'Describí tu situación y recibí una respuesta priorizada, basada en el contenido del manual.';
+  document.getElementById('sectionDesc').textContent = 'Elegí una situación y recibí una respuesta priorizada, basada en el contenido del manual.';
   document.getElementById('toolbar').style.display = 'none';
 
   const content = document.getElementById('content');
@@ -3653,26 +4134,9 @@ function renderIASection(){
     <div class="quick-replies" id="quickReplies">
       ${IA_QUICK.map(q => `<span class="quick-chip" data-q="${escapeHtml(q)}">${escapeHtml(q)}</span>`).join('')}
     </div>
-    <form class="chat-input-row" id="chatForm">
-      <input type="text" id="chatInput" placeholder="Ej: tengo frío y no encuentro refugio..." autocomplete="off">
-      <button type="submit" class="btn">Enviar</button>
-    </form>
   `;
 
   renderChatMessages();
-
-  document.getElementById('chatForm').addEventListener('submit', e => {
-    e.preventDefault();
-    const input = document.getElementById('chatInput');
-    const val = input.value.trim();
-    if(!val) return;
-    iaState.mensajes.push({ from: 'user', html: escapeHtml(val) });
-    iaState.mensajes.push({ from: 'bot', html: iaGenerarRespuesta(val) });
-    input.value = '';
-    trackMensajeIA();
-    guardarChat();
-    renderChatMessages();
-  });
 
   document.querySelectorAll('.quick-chip').forEach(chip => {
     chip.addEventListener('click', () => {
@@ -3736,7 +4200,7 @@ function climaDescribirCodigo(code){
 }
 
 function renderClimaSection(){
-  document.getElementById('sectionEyebrow').textContent = 'MÓDULO 16 — CLIMA';
+  document.getElementById('sectionEyebrow').textContent = 'MÓDULO 20 — CLIMA';
   document.getElementById('sectionTitle').textContent = 'Clima';
   document.getElementById('sectionDesc').textContent = 'Si tu navegador lo permite, consultamos la temperatura, el viento y la lluvia de tu zona, y la IA te dice qué priorizar.';
   document.getElementById('toolbar').style.display = 'none';
@@ -4894,7 +5358,7 @@ function cargarSimulador(){
 }
 
 function renderSimuladorSection(){
-  document.getElementById('sectionEyebrow').textContent = 'MÓDULO 17 — SIMULACIÓN';
+  document.getElementById('sectionEyebrow').textContent = 'MÓDULO 22 — SIMULACIÓN';
   document.getElementById('sectionTitle').textContent = 'Simulador de decisiones';
   document.getElementById('sectionDesc').textContent = 'Elegí un escenario y tomá decisiones bajo presión. Cada elección afecta tus estadísticas de supervivencia.';
   document.getElementById('toolbar').style.display = 'none';
@@ -5019,6 +5483,236 @@ function renderSimStats(){
     `).join('')}
     <div class="sim-log">${simState.log.map(l => `&gt; ${escapeHtml(l)}`).join('<br>')}</div>
   `;
+}
+
+
+/* =========================================================================
+   TEST DE TRIVIA ZOMBIE
+   Banco de 200 preguntas de opcion multiple sobre la tematica de fan de
+   apocalipsis zombie (ficcion, no informacion medica real). Cada intento
+   toma 20 preguntas al azar del banco y mezcla el orden de las opciones,
+   para que dos intentos casi nunca sean iguales. Al final se muestra un
+   puntaje y una prediccion de supervivencia narrativa segun el resultado.
+========================================================================= */
+
+const ZOMBIE_QUESTIONS = [{"p":"¿Qué característica es más importante al elegir un refugio defendible según el género zombie?","o":["Que tenga muchas puertas de entrada","Que tenga pocos puntos de entrada fáciles de vigilar","Que esté cerca de una autopista","Que tenga vidrieras grandes"],"r":1},{"p":"¿Por qué se prioriza un segundo piso con escalera retráctil como refugio?","o":["Porque tiene mejor señal de wifi","Porque los infectados clásicos no suelen trepar ni usar escaleras","Porque es más barato","Porque siempre hay agua potable arriba"],"r":1},{"p":"¿Cuántas vías de escape distintas conviene tener en un refugio, como mínimo?","o":["Ninguna, una sola puerta basta","Al menos dos","Al menos cinco","No importa, sirve cualquier ventana"],"r":1},{"p":"¿Qué debería evitarse en la planta baja de un refugio?","o":["Muebles pesados","Ventanales grandes hacia la calle","Puertas reforzadas","Un patio interno"],"r":1},{"p":"Al reforzar una puerta con muebles pesados, ¿cómo conviene apoyarlos?","o":["De frente, en línea recta","En diagonal, para repartir la fuerza de un empuje","No hace falta apoyarlos, solo trabarlos","Apilados en el techo"],"r":1},{"p":"¿Cómo se recomienda cubrir ventanas bajas con tablas?","o":["En paralelo, todas en la misma dirección","Cruzadas en forma de cruz","Solo con una tabla fina","No es necesario cubrirlas"],"r":1},{"p":"¿Para qué sirve dejar una 'vía de escape secreta' en el refugio?","o":["Para que la use cualquier visitante","Para tener una salida que solo el grupo conozca si la entrada principal falla","Para guardar comida","Para ventilar la casa"],"r":1},{"p":"¿Qué función cumplen las alarmas improvisadas con latas o botellas?","o":["Decorar el refugio","Detectar intrusiones en accesos secundarios antes de que lleguen a la puerta principal","Espantar animales domésticos","Medir la temperatura"],"r":1},{"p":"Según la guía, ¿qué suele fallar primero en una barricada mal mantenida?","o":["El ataque directo de una horda","El desgaste silencioso por falta de revisión diaria","El color de la pintura","El ruido de la calle"],"r":1},{"p":"¿Qué se busca al elegir un punto de vigilancia?","o":["Un lugar bajo y oscuro","Un punto alto con vista despejada hacia el acceso más probable","Un lugar lejos del refugio","Un sótano sin ventanas"],"r":1},{"p":"¿Por qué se recomienda turnar la guardia en bloques cortos?","o":["Porque es una tradición","Porque la atención baja mucho después de la primera hora sin descanso","Porque así se gasta menos comida","Porque los turnos largos generan ruido"],"r":1},{"p":"¿Qué tipo de señal conviene usar para avisar al grupo sin gritar?","o":["Bocinazos","Golpes o luces, una señal simple y silenciosa","Gritos codificados","Fuegos artificiales"],"r":1},{"p":"¿Qué error clásico de la ficción se menciona sobre dejar el puesto de guardia?","o":["Llevar binoculares","Dejarlo sin avisar a nadie, ni siquiera 'un minuto'","Turnarse cada hora","Vigilar de día"],"r":1},{"p":"¿Qué ventaja da tener binoculares en la vigilancia?","o":["Ahorrar agua","Detectar una horda temprano, antes de que llegue","Comunicarse con otros grupos","Encender fuego"],"r":1},{"p":"¿Qué zona del refugio conviene revisar en busca de recursos cercanos?","o":["El entorno inmediato, buscando agua y comida cercanas","Solo el interior del edificio","El techo únicamente","No hace falta revisar nada"],"r":0},{"p":"En la elección de refugio, ¿qué tipo de edificio suele ser más fácil de defender?","o":["Uno con muchas entradas independientes","Uno con pocas entradas y buena visibilidad del entorno","Un shopping enorme","Una estación de servicio abierta las 24 horas"],"r":1},{"p":"¿Qué se recomienda hacer con las barricadas todos los días?","o":["Desarmarlas para airear el lugar","Revisarlas y reforzarlas","Pintarlas de otro color","Ignorarlas si nadie atacó todavía"],"r":1},{"p":"¿Por qué conviene evitar plantas bajas con vidrieras grandes?","o":["Porque hace mucho calor","Porque suelen ser el primer punto por donde cede una barricada","Porque no entra luz suficiente","Porque atraen mosquitos"],"r":1},{"p":"¿Qué rol cumple una 'segunda vía de escape' en un refugio comprometido?","o":["Sirve como depósito de basura","Permite salir si el refugio principal deja de ser seguro","Es solo decorativa","Sirve para tender ropa"],"r":1},{"p":"¿Qué combinación de factores hace ideal a un refugio, según la guía?","o":["Muchas entradas y poca altura","Pocos accesos, algo de altura, y agua/comida cercanas","Estar lejos de cualquier fuente de agua","Tener vidrios grandes por todos lados"],"r":1},{"p":"En la ficción zombie clásica, ¿qué atrae más a los infectados?","o":["El olor a comida","El sonido, más que la vista o el olfato","Los colores brillantes","El calor corporal únicamente"],"r":1},{"p":"¿Cómo se recomienda moverse para reducir ruido y silueta?","o":["Corriendo en zigzag","Despacio y pegado a paredes o vehículos","Saltando obstáculos","En grupos grandes y dispersos"],"r":1},{"p":"¿Por qué se evita correr salvo que sea necesario?","o":["Porque cansa más rápido nada más","Porque el ruido de correr se escucha mucho más lejos que caminar con cuidado","Porque no se puede llevar mochila corriendo","Porque los zombies corren siempre más rápido"],"r":1},{"p":"¿Qué se debe hacer con objetos sueltos como llaves o cadenas antes de salir?","o":["Dejarlos en casa siempre","Silenciarlos para que no hagan ruido","Tirarlos","Usarlos como armas de inmediato"],"r":1},{"p":"¿Para qué sirve generar un ruido lejano como distracción?","o":["Para practicar puntería","Para desviar a una horda de la ruta real","Para llamar a otros sobrevivientes","Para asustar animales"],"r":1},{"p":"¿Cómo se recomienda comunicarse en zona infestada?","o":["Hablando en voz alta y clara","Con señas o susurros","Con silbidos fuertes","Gritando el nombre de cada compañero"],"r":1},{"p":"¿Qué error de comunicación se menciona como muy común en el género?","o":["Usar señas","Hablar en voz normal en zona infestada","Susurrar","Usar linternas de noche"],"r":1},{"p":"Al salir a buscar suministros, ¿qué se recomienda llevar además de una lista?","o":["Nada más que la lista","Un objetivo concreto y un límite de tiempo","Toda la comida del refugio","Un megáfono"],"r":1},{"p":"¿Qué rol cumple un compañero durante una salida de recolección?","o":["Quedarse en el refugio dormido","Cubrir la retirada mientras el otro recolecta","Cargar toda la mochila sin ayudar","No tiene ningún rol específico"],"r":1},{"p":"¿Qué tipo de edificios se priorizan para salidas de recolección?","o":["Supermercados enormes y laberínticos","Edificios pequeños y de layout simple, como farmacias o kioscos","Solo edificios sin puertas","Estadios deportivos"],"r":1},{"p":"¿Qué se debe revisar al volver de una salida, antes de reingresar al refugio?","o":["Que nadie tenga heridas o mordeduras","Que todos tengan hambre","Que el clima haya cambiado","Que nadie perdió las llaves"],"r":0},{"p":"¿Cuántas rutas distintas conviene definir antes de una salida?","o":["Solo una, la más corta","Dos rutas distintas de ida y vuelta","Ninguna, se improvisa en el momento","Diez rutas como mínimo"],"r":1},{"p":"¿Qué se acuerda con el grupo antes de salir, por si alguien se separa?","o":["Un punto de encuentro fijo y fácil de describir","Nada, cada uno se las arregla","Un horario de comidas","El color de la ropa que usarán"],"r":0},{"p":"Si el grupo tiene vehículo durante una salida, ¿cómo debería estar ubicado?","o":["De espaldas a la ruta de escape","Apuntando hacia la salida y con las llaves accesibles","Estacionado lejos, para que no lo vean","Sin combustible, por seguridad"],"r":1},{"p":"¿Qué se establece respecto al tiempo de espera en el punto de encuentro?","o":["Esperar para siempre sin límite","Un tiempo límite antes de asumir que hay que seguir sin esa persona","No esperar nada, irse enseguida","Esperar solo si llueve"],"r":1},{"p":"¿Qué tipo de rutas conviene evitar como camino principal?","o":["Calles anchas y rectas","Pasajes angostos o callejones sin salida","Rutas cercanas al refugio","Caminos de tierra"],"r":1},{"p":"¿Por qué se recomienda moverse pegado a paredes o vehículos?","o":["Para tomar sombra del sol","Para reducir la silueta y el ruido de los pasos","Para no ensuciarse la ropa","Para orientarse mejor"],"r":1},{"p":"¿Qué se prioriza al armar la lista de una salida de recolección corta?","o":["Un objetivo concreto en vez de improvisar dentro del edificio","Llevar la mayor cantidad de gente posible","No llevar ninguna lista","Ir sin horario definido"],"r":0},{"p":"¿Qué actitud se castiga más en la ficción durante una incursión?","o":["Salir con lista y límite de tiempo","Quedarse improvisando adentro de un edificio infestado","Llevar un compañero","Revisar heridas al volver"],"r":1},{"p":"¿Qué tan importante es la disciplina de ruido según la ficción zombie?","o":["Poco importante, el olfato es lo que más atrae","Muy importante, ya que el sonido suele atraer más que la vista","Irrelevante de noche","Solo importa en interiores"],"r":1},{"p":"¿Qué se recomienda hacer ante una posible mordedura, según los protocolos de grupo?","o":["Ocultarla para no preocupar a nadie","Avisar de inmediato y seguir el protocolo del grupo","Esperar unos días a ver qué pasa","Automedicarse en secreto"],"r":1},{"p":"¿Cuál es uno de los primeros signos clásicos de infección en la ficción?","o":["Mejora repentina del ánimo","Fiebre alta y sudoración excesiva","Aumento de apetito por vegetales","Pérdida de sed"],"r":1},{"p":"¿Qué cambios de conducta suelen anticipar los síntomas físicos en el género?","o":["Calma extrema y silencio total","Agresividad repentina, confusión o aislamiento","Aumento de la generosidad","Ganas de liderar el grupo"],"r":1},{"p":"¿Qué recurso visual usa el género para marcar el avance de una infección?","o":["Cambios de color de ropa","Decoloración de venas y palidez creciente","Crecimiento de cabello","Cambio de tono de voz agudo"],"r":1},{"p":"¿Qué se recomienda hacer ante cualquier sospecha de infección?","o":["Negarlo y seguir como si nada","Aislar rápido y con calma","Confrontar violentamente a la persona","Esperar a que se cure sola"],"r":1},{"p":"¿Qué rol cumple la rotación de tareas dentro de un grupo?","o":["Ninguno, siempre debe hacer todo la misma persona","Evita que una sola persona se sobrecargue con una tarea","Sirve solo para entretenimiento","Aumenta el gasto de recursos"],"r":1},{"p":"¿Qué se recomienda sobre la ración de suministros?","o":["Esperar a que escaseen para racionar","Racionar desde el primer día","No racionar nunca","Repartir todo en una sola comida"],"r":1},{"p":"¿Cómo se recomienda tomar decisiones importantes en el grupo?","o":["De forma individual y autoritaria","En conjunto, entre todos","Por sorteo","Dejando que decida siempre el más fuerte"],"r":1},{"p":"Según la guía, ¿qué tipo de liderazgo suele terminar mal en la ficción?","o":["El liderazgo compartido","Los liderazgos autoritarios no consultados","El liderazgo rotativo","El liderazgo democrático"],"r":1},{"p":"¿Para qué sirve reservar un momento del día para hablar de algo distinto a la supervivencia?","o":["Perder el tiempo","Sostener la cohesión del grupo a largo plazo","Aumentar el estrés","No sirve para nada"],"r":1},{"p":"¿Qué se establecen como turnos fijos incluso en un grupo chico?","o":["Turnos de guardia nocturna","Turnos de siesta","Turnos de lectura","Turnos de canto"],"r":0},{"p":"¿Qué se prioriza frente a los infectados según la dinámica de grupo en la ficción?","o":["Las armas de fuego","La propia dinámica de grupo, que suele decidir más que los infectados","El clima","La suerte"],"r":1},{"p":"¿Qué acción se recomienda 'aislar' cuando aparecen señales tempranas de infección?","o":["A todo el grupo","A la persona con síntomas, rápido y con calma","Solo a los niños","A nadie, no hace falta aislar"],"r":1},{"p":"¿Qué suele marcar las últimas horas antes de una transformación completa, según el género?","o":["Aumento de energía y velocidad","Pérdida de coordinación motriz y habla cada vez más lenta","Mejora del apetito","Recuperación total"],"r":1},{"p":"¿Qué se recomienda definir junto con los roles del grupo?","o":["Nada más, los roles alcanzan","Rotarlos para que nadie se queme con una sola tarea","Fijarlos para siempre sin cambios","Sortearlos cada hora"],"r":1},{"p":"¿Qué tan determinante es la convivencia grupal en las historias del género, según la guía?","o":["Poco, lo esencial son las armas","Muy determinante, a veces más que los infectados en sí","Nula influencia","Solo importa el primer día"],"r":1},{"p":"¿Qué se recomienda hacer con los turnos de guardia nocturna en grupos pequeños?","o":["Eliminarlos por falta de gente","Establecerlos igual, aunque el grupo sea chico","Hacerlos solo los fines de semana","Dejar que decida una sola persona cada vez"],"r":1},{"p":"¿Qué actitud grupal ayuda a sostener la cohesión a largo plazo?","o":["Ignorar los conflictos","Reservar espacio para hablar de temas ajenos a la supervivencia","Competir por los recursos","Evitar toda comunicación"],"r":1},{"p":"¿Qué se debe hacer si un miembro del grupo oculta una herida sospechosa?","o":["Respetar su privacidad sin preguntar","Seguir el protocolo de revisión y aislamiento del grupo","Expulsarlo sin hablar","No hacer nada hasta que empeore"],"r":1},{"p":"¿Qué combinación de factores suele decidir la supervivencia de un grupo en la ficción?","o":["Solo la cantidad de armas","Los protocolos claros, la convivencia y la toma de decisiones en conjunto","La suerte únicamente","El tamaño del refugio"],"r":1},{"p":"¿Qué es un 'bug-out bag' según la guía?","o":["Una bolsa de residuos","Una mochila lista para evacuar en minutos","Un tipo de refugio subterráneo","Un arma improvisada"],"r":1},{"p":"¿Dónde conviene guardar la mochila de evacuación?","o":["En un lugar distinto cada día","En un lugar fijo, siempre lista","Repartida en varias mochilas pequeñas","Prestada a un vecino"],"r":1},{"p":"¿Qué tipo de contenido se prioriza en el kit de evacuación?","o":["Objetos pesados y de un solo uso","Elementos livianos y multipropósito","Solo entretenimiento","Ropa de gala"],"r":1},{"p":"¿Qué documentos conviene incluir en el kit de evacuación?","o":["Ninguno, no sirven en una emergencia","Copias de documentos importantes y algo de efectivo","Solo fotos familiares","Recetas de cocina"],"r":1},{"p":"¿Cada cuánto se recomienda revisar y renovar el contenido del kit?","o":["Nunca, una vez armado ya sirve para siempre","Cada tanto, para que pilas, comida y agua sigan sirviendo","Solo cuando se rompe la mochila","Cada diez años"],"r":1},{"p":"¿Qué se recomienda practicar respecto a la mochila de evacuación?","o":["Dejarla escondida y no tocarla","Practicar agarrarla y salir en menos de un minuto","Pesarla todos los días","Cambiarla de lugar cada semana"],"r":1},{"p":"¿Cuántos puntos de encuentro conocidos conviene acordar con el grupo?","o":["Ninguno","Dos o tres, ordenados de más cercano a más lejano","Diez o más","Solo uno, muy lejano"],"r":1},{"p":"¿Qué se recomienda marcar con anticipación además de los puntos de encuentro?","o":["Nada más hace falta","Al menos dos rutas distintas hacia esos puntos","Solo una ruta, la más rápida","El clima de cada día"],"r":1},{"p":"¿Qué regla simple conviene definir por si el grupo se separa?","o":["No definir nada, improvisar","A dónde ir primero y cuánto tiempo esperar antes de seguir","Separarse definitivamente","Volver siempre al punto de partida"],"r":1},{"p":"¿Por qué conviene guardar copias físicas del plan, además de digitales?","o":["Porque ocupan menos espacio","Porque la tecnología suele ser lo primero que falla en la ficción","Porque son más bonitas","No hay ninguna razón particular"],"r":1},{"p":"¿Qué habilidad se menciona como más decisiva que cualquier arma?","o":["La velocidad para correr","La condición física y la calma bajo presión","La fuerza bruta","La puntería"],"r":1},{"p":"¿Qué tipo de entrenamiento mental se recomienda practicar de antemano?","o":["Ninguno, se aprende en el momento","Escenarios simples de decisión rápida","Memorizar mapas de otros países","Aprender idiomas"],"r":1},{"p":"¿Qué se prioriza antes que la fuerza, según la preparación mental?","o":["La velocidad","La calma","La agresividad","El tamaño del grupo"],"r":1},{"p":"¿Qué ventaja da conocer bien el propio entorno de antemano?","o":["Ninguna en particular","Es una ventaja que ningún entrenamiento físico reemplaza","Sirve solo para turismo","Ayuda a encontrar comida rápida"],"r":1},{"p":"¿Qué se recomienda llevar en el inventario de suministros a largo plazo?","o":["No llevar ningún registro","Un inventario simple y actualizado","Solo memoria, sin anotar nada","Un inventario solo de armas"],"r":1},{"p":"¿Cómo se recomienda rotar la comida y el agua almacenada?","o":["Usando primero lo más nuevo","Usando primero lo más próximo a vencer","Sin ningún orden particular","Tirando lo viejo sin usarlo"],"r":1},{"p":"¿Por qué se recomienda diversificar el almacenamiento en más de un lugar?","o":["Por estética","Por si una zona del refugio queda inaccesible","Para ocupar más espacio","No hay ninguna razón"],"r":1},{"p":"¿Qué se prioriza por sobre la comida en las reservas a largo plazo?","o":["La ropa de repuesto","El agua e insumos médicos, por ser más críticos a corto plazo","El entretenimiento","Los combustibles"],"r":1},{"p":"¿Qué conviene identificar de antemano respecto a posibles refugios?","o":["Nada, se decide en el momento","Dos o tres lugares posibles que cumplan buenas características","Solo un lugar, sin alternativas","Refugios muy lejanos únicamente"],"r":1},{"p":"¿Qué se recomienda acordar con el grupo sobre el refugio 'por defecto'?","o":["No acordar nada","Cuál sería el refugio por defecto si no pueden comunicarse","Cambiarlo cada semana sin avisar","Elegirlo por votación diaria"],"r":1},{"p":"En la ficción zombie, ¿qué tipo de arma se suele preferir para no atraer más infectados?","o":["Armas de fuego siempre","Armas cuerpo a cuerpo silenciosas","Explosivos","Bocinas"],"r":1},{"p":"¿Por qué se evita el uso de armas de fuego salvo emergencia extrema en muchas historias?","o":["Porque no existen balas","Porque el disparo hace ruido y atrae a más infectados","Porque son ilegales","Porque pesan demasiado"],"r":1},{"p":"¿Qué característica se busca en un arma improvisada de mango largo?","o":["Que sea muy pesada para cansar al usuario","Que permita golpear manteniendo distancia del infectado","Que sea decorativa","Que haga mucho ruido"],"r":1},{"p":"¿Qué zona del cuerpo se apunta clásicamente en la ficción para detener a un infectado?","o":["Las manos","La cabeza","Los pies","La espalda"],"r":1},{"p":"¿Por qué conviene mantener las armas improvisadas en buen estado?","o":["Para que se vean bien en fotos","Porque una falla en el momento crítico puede ser fatal","No es necesario mantenerlas","Solo por tradición"],"r":1},{"p":"¿Qué ventaja tiene pelear en espacios angostos frente a un solo infectado?","o":["Ninguna, siempre es peor","Limita que rodeen al defensor y permite enfrentarlos de a uno","Hace más ruido","Aumenta el número de infectados"],"r":1},{"p":"¿Qué se recomienda evitar al enfrentar a varios infectados a la vez?","o":["Buscar un lugar angosto","Quedar rodeado en espacio abierto","Usar un arma larga","Retroceder con calma"],"r":1},{"p":"¿Qué rol cumple la distancia al usar un arma de mango largo frente a un arma corta?","o":["Ninguna diferencia","Da más tiempo de reacción antes del contacto","Hace que pese menos","Reduce la puntería"],"r":1},{"p":"¿Por qué se desaconseja el combate cuerpo a cuerpo sin protección en los brazos?","o":["Porque no es elegante","Porque aumenta el riesgo de mordedura o contacto con fluidos","Porque cansa más rápido","No hay ninguna razón práctica"],"r":1},{"p":"¿Qué se recomienda hacer antes de acercarse a un infectado caído que no se mueve?","o":["Acercarse de inmediato sin precaución","Confirmar que realmente está inmovilizado antes de acercarse","Ignorarlo y seguir caminando siempre","Tocarlo con la mano directamente"],"r":1},{"p":"¿Qué ventaja aporta pelear con un compañero cubriendo la espalda?","o":["Ninguna, siempre es mejor pelear solo","Reduce el riesgo de ser sorprendido por detrás","Hace más ruido y atrae más peligro","Gasta más recursos"],"r":1},{"p":"¿Por qué se prioriza evitar el combate directo cuando es posible?","o":["Porque siempre se pierde","Porque cada enfrentamiento implica riesgo y desgasta recursos y energía","Porque está prohibido en la ficción","Porque no aporta experiencia"],"r":1},{"p":"¿Qué tipo de superficie conviene evitar al pelear, si es posible elegir?","o":["Superficie firme y seca","Superficie resbaladiza o inestable","Un pasillo angosto","Un lugar iluminado"],"r":1},{"p":"¿Qué se recomienda revisar en un arma improvisada antes de una salida?","o":["Nada, se usa tal cual está","Que esté firme, sin partes flojas que puedan fallar","Su color","Su peso exacto en gramos"],"r":1},{"p":"¿Qué ventaja da tener más de un arma disponible en el grupo?","o":["Ninguna, una alcanza para todos","Tener respaldo si una falla o se pierde en el momento","Aumenta el ruido innecesariamente","Sirve solo para intercambiar con otros grupos"],"r":1},{"p":"¿Qué se recomienda con las heridas propias sufridas en combate, aunque no sean mordeduras?","o":["Ignorarlas","Limpiarlas y tratarlas cuanto antes para evitar infecciones comunes","Esperar a que sanen solas siempre","Ocultarlas al grupo"],"r":1},{"p":"¿Por qué se prefiere retirarse en vez de arriesgarse en un combate innecesario?","o":["Porque retirarse es señal de debilidad","Porque preservar la vida y los recursos vale más que un enfrentamiento evitable","Porque los infectados se cansan rápido","No hay ninguna razón, siempre conviene pelear"],"r":1},{"p":"¿Qué característica hace útil a un arma para el combate silencioso?","o":["Que sea ruidosa para intimidar","Que permita neutralizar sin generar sonidos fuertes","Que sea explosiva","Que necesite recarga constante"],"r":1},{"p":"¿Qué se recomienda antes de improvisar un arma con materiales encontrados?","o":["Usarla sin probarla","Probar su resistencia y agarre antes de depender de ella","Descartarla de inmediato","Guardarla sin revisar nunca"],"r":1},{"p":"¿Qué principio general resume el uso de armas en la ficción de supervivencia?","o":["Pelear siempre que se pueda","Evitar el enfrentamiento cuando se pueda, y estar preparado cuando no","Usar solo armas de fuego","Ignorar el mantenimiento de las armas"],"r":1},{"p":"En muchas historias del género, ¿qué sentido se describe como el más desarrollado en los infectados?","o":["La vista","El oído","El gusto","El tacto"],"r":1},{"p":"¿Qué tropo clásico describe a infectados que se mueven muy lentamente?","o":["El infectado corredor","El infectado 'caminante' lento y torpe","El infectado volador","El infectado invisible"],"r":1},{"p":"¿Qué variante más moderna del género introduce infectados rápidos y agresivos?","o":["Los caminantes lentos clásicos","Los infectados 'corredores'","Los infectados dormidos","Los infectados pacíficos"],"r":1},{"p":"¿Qué comportamiento grupal de los infectados se conoce como 'horda'?","o":["Un infectado solitario escondido","Un grupo grande de infectados moviéndose junto atraído por un estímulo","Un infectado que duerme todo el día","Un infectado que negocia con humanos"],"r":1},{"p":"¿Qué elemento suele atraer a una horda hacia un lugar específico?","o":["El silencio total","Ruidos fuertes o luces llamativas","La oscuridad completa","El frío extremo"],"r":1},{"p":"En la ficción, ¿qué se suele decir sobre la capacidad de razonamiento de los infectados clásicos?","o":["Razonan igual que un humano sano","Actúan por instinto, sin razonamiento complejo","Planifican estrategias elaboradas","Hablan con fluidez"],"r":1},{"p":"¿Qué tropo describe a un personaje que oculta una mordedura por miedo a ser expulsado?","o":["El héroe perfecto","El infectado oculto","El líder sabio","El explorador"],"r":1},{"p":"¿Qué mito común del género se refiere a que basta un rasguño para infectar?","o":["Es siempre falso en toda ficción","Varía según la historia, pero suele bastar contacto con fluidos infectados","Solo infecta el aire","Nunca se infecta por contacto"],"r":1},{"p":"¿Qué recurso narrativo usan muchas historias para mostrar el avance de una horda?","o":["El silencio absoluto sin ningún aviso","Sonidos crecientes o vibraciones que se sienten antes de verla","Un mensaje de texto previo","Un cartel de advertencia oficial"],"r":1},{"p":"¿Qué características suelen compartir casi todos los tropos de infectados del género?","o":["Inteligencia superior a la humana","Pérdida de las funciones cognitivas complejas y conducta agresiva","Capacidad de volar","Inmunidad total al fuego"],"r":1},{"p":"¿Qué recurso de la ficción explica por qué algunos personajes son inmunes?","o":["Nunca hay personajes inmunes","Una resistencia genética o biológica especial en la trama","La suerte únicamente, sin explicación","El uso de perfumes especiales"],"r":1},{"p":"¿Qué comportamiento describe a un infectado que actúa distinto al resto de la horda?","o":["Un infectado 'especial' con alguna habilidad distinta en la trama","Un humano disfrazado","Un robot","Un animal común"],"r":0},{"p":"¿Qué se recomienda hacer al notar el sonido creciente de una horda acercándose?","o":["Acercarse a investigar el sonido","Buscar refugio o vía de escape antes de que llegue","Ignorarlo y seguir la rutina normal","Hacer más ruido para confirmar"],"r":1},{"p":"¿Qué elemento suele usarse en la ficción para separar a un infectado de una horda?","o":["Ofrecerle comida","Un ruido o señuelo que lo distraiga hacia otro lado","Hablarle con calma","Ignorarlo completamente"],"r":1},{"p":"¿Qué tropo describe una zona urbana completamente tomada por infectados?","o":["Zona segura","Zona infestada o 'zona caliente'","Zona neutral","Zona de comercio"],"r":1},{"p":"En muchas historias, ¿qué pasa con el estado físico del cuerpo infectado con el paso del tiempo?","o":["Se mantiene igual para siempre","Suele deteriorarse progresivamente","Mejora con el tiempo","Se vuelve más joven"],"r":1},{"p":"¿Qué tropo se usa para representar el momento exacto de la transformación?","o":["Una escena de celebración","Un colapso físico seguido de un cambio de comportamiento","Una mejora repentina de salud","Un sueño profundo sin cambios"],"r":1},{"p":"¿Qué relación se suele mostrar entre el número de infectados y el riesgo de un área?","o":["A más infectados, menor riesgo","A mayor densidad de infectados, mayor riesgo de la zona","No hay relación en la ficción","El riesgo depende solo del clima"],"r":1},{"p":"¿Qué elemento de la ficción explica por qué los infectados no reconocen a sus seres queridos?","o":["Sí los reconocen siempre y los protegen","La pérdida de identidad y funciones cognitivas superiores","Usan disfraces","Tienen amnesia temporal reversible"],"r":1},{"p":"¿Qué se recomienda sobre acercarse a un infectado inmóvil para 'confirmarlo'?","o":["Acercarse corriendo de inmediato","Confirmar con cautela desde una distancia segura antes de acercarse","Ignorarlo completamente sin verificar","Tocarlo con la mano descubierta"],"r":1},{"p":"¿Qué se recomienda hacer con el agua de fuentes desconocidas durante un brote?","o":["Beberla directamente sin tratar","Hervirla o purificarla antes de consumirla","Usarla solo para lavar ropa","Descartarla siempre sin excepción"],"r":1},{"p":"¿Qué tipo de alimentos se prioriza guardar para un escenario de brote prolongado?","o":["Alimentos frescos sin conservar","Alimentos no perecederos y fáciles de transportar","Solo bebidas azucaradas","Alimentos que requieren refrigeración constante"],"r":1},{"p":"¿Por qué se recomienda combinar la búsqueda de comida con otras tareas necesarias?","o":["Para perder más tiempo","Para no salir exclusivamente a esa tarea y ahorrar riesgo y energía","No hay ninguna razón práctica","Para gastar más suministros"],"r":1},{"p":"¿Qué zonas suelen tener mayor diversidad de recursos comestibles según la guía de recolección?","o":["El centro de un bosque muy cerrado","Bordes de bosque, claros y orillas de agua","El asfalto de una autopista","Un edificio completamente sellado"],"r":1},{"p":"¿Qué conviene llevar siempre en una salida de recolección de recursos?","o":["Nada, las manos alcanzan","Algo para transportar lo recolectado","Solo un arma, sin bolsa","Un megáfono"],"r":1},{"p":"¿Qué se recomienda hacer con los lugares donde se encontró comida identificada con certeza?","o":["Olvidarlos de inmediato","Marcarlos mentalmente o con señales para volver más rápido","Contárselo a cualquier desconocido","Evitarlos en el futuro"],"r":1},{"p":"Si la situación se extiende varios días, ¿qué conviene hacer con lo recolectado?","o":["Consumir todo de inmediato","Recolectar un poco más de lo necesario y aplicar conservación","Tirar el excedente","Repartirlo con extraños sin control"],"r":1},{"p":"¿Qué método simple ayuda a conservar agua limpia por más tiempo?","o":["Guardarla en recipientes sucios","Guardarla en recipientes limpios y bien cerrados","Dejarla al sol siempre destapada","Mezclarla con tierra"],"r":1},{"p":"¿Qué se recomienda priorizar entre agua, comida e insumos médicos en una reserva de emergencia?","o":["Solo la comida","El agua y los insumos médicos, por ser más críticos a corto plazo","Solo el entretenimiento","Nada en particular"],"r":1},{"p":"¿Qué riesgo implica depender de una sola fuente de agua?","o":["Ninguno, es lo ideal","Quedarse sin acceso si esa fuente se contamina o resulta inaccesible","Ahorra tiempo siempre","Mejora la calidad del agua"],"r":1},{"p":"¿Qué ventaja tiene identificar plantas comestibles con certeza antes de un brote?","o":["Ninguna, se aprende sobre la marcha","Permite recolectar con confianza y ahorrar tiempo de identificación en el momento","Aumenta el riesgo de intoxicación","No tiene relación con la supervivencia"],"r":1},{"p":"¿Qué se recomienda hacer con la comida almacenada según su fecha?","o":["Usar primero la más nueva","Rotarla usando primero la más próxima a vencer","No importa el orden","Guardarla sin revisar nunca"],"r":1},{"p":"¿Qué se prioriza al elegir qué transportar en una salida de recolección corta?","o":["Cargar todo lo que se encuentre sin límite","Priorizar lo liviano y lo más necesario","Solo objetos decorativos","Nada, salir con las manos vacías siempre"],"r":1},{"p":"¿Qué se recomienda sobre el trueque con otros grupos de sobrevivientes?","o":["Evitarlo siempre, sin excepciones","Sumar algo de trueque potencial, elementos útiles pero no imprescindibles","Ofrecer siempre los recursos más críticos","No tiene sentido en la ficción"],"r":1},{"p":"¿Qué se recomienda hacer antes de consumir un alimento silvestre desconocido?","o":["Comerlo directamente","Identificarlo con certeza antes de consumirlo","Dárselo primero a otra persona sin avisar","Cocinarlo sin identificarlo"],"r":1},{"p":"¿Qué ventaja da recolectar en distintos horarios del día?","o":["Ninguna, siempre es igual","Permite aprovechar mejor luz, temperatura y menor actividad de infectados según el momento","Aumenta el riesgo sin ningún beneficio","Reduce la cantidad de recursos disponibles"],"r":1},{"p":"¿Qué se recomienda con los envases y recipientes usados para transportar agua o comida?","o":["Descartarlos después de un solo uso siempre","Reutilizarlos y mantenerlos limpios","Dejarlos sin lavar","Usarlos también para otros líquidos peligrosos"],"r":1},{"p":"¿Qué rol cumple el registro o inventario de suministros disponibles?","o":["Ninguno, no aporta nada","Permite saber qué reservas quedan y planificar mejor","Solo sirve para decorar el refugio","Aumenta el consumo de recursos"],"r":1},{"p":"¿Qué se recomienda priorizar al momento de repartir recursos escasos en el grupo?","o":["Repartir sin ningún criterio","Repartir de forma organizada y racionada desde el principio","Dárselo todo a una sola persona","Esperar a que se terminen para repartir"],"r":1},{"p":"¿Qué relación existe entre buena planificación de recursos y tiempo de supervivencia en la ficción?","o":["No hay relación alguna","Una buena planificación suele alargar el tiempo de supervivencia del grupo","La planificación siempre reduce el tiempo de supervivencia","Solo influye la suerte"],"r":1},{"p":"¿Qué ventaja tiene una bicicleta frente a un auto en zona infestada, según muchas historias?","o":["Consume más combustible","Es más silenciosa y no depende de combustible","Es más rápida en todos los casos","No sirve para nada en el género"],"r":1},{"p":"¿Qué se recomienda revisar en un vehículo antes de usarlo para escapar?","o":["Nada, se usa directamente","Combustible, estado general y que no llame la atención por ruido","Solo el color de la pintura","La cantidad de asientos únicamente"],"r":1},{"p":"¿Por qué el ruido de un motor puede ser un problema en zona infestada?","o":["Porque no afecta a los infectados","Porque puede atraer a una horda hacia la ubicación del vehículo","Porque ahorra combustible","Porque mejora la visibilidad"],"r":1},{"p":"¿Qué se recomienda hacer con las llaves del vehículo de escape?","o":["Esconderlas lejos del vehículo","Mantenerlas accesibles para todo el grupo","Dárselas a un desconocido","Tirarlas para evitar robos"],"r":1},{"p":"¿Qué ventaja da conocer más de una ruta de escape en vehículo?","o":["Ninguna, una basta siempre","Tener alternativa si una ruta se bloquea con infectados o escombros","Aumenta el gasto de combustible sin sentido","Confunde al grupo"],"r":1},{"p":"¿Qué se recomienda evitar como ruta principal de escape en vehículo?","o":["Rutas anchas y despejadas","Puentes únicos o cuellos de botella sin alternativa","Caminos conocidos por el grupo","Rutas cercanas al refugio"],"r":1},{"p":"¿Qué se prioriza al calcular el consumo de combustible de un vehículo de escape?","o":["Ignorar el consumo por completo","Calcular el gasto según kilómetros y modelo real del vehículo","Llenar el tanque sin calcular nada","Usar siempre motos, nunca autos"],"r":1},{"p":"¿Qué ventaja tiene caminar frente a usar un vehículo en ciertas zonas muy infestadas?","o":["Ninguna, el vehículo siempre es mejor","Permite mayor sigilo y control en zonas de calles obstruidas","Es siempre más rápido","Gasta menos energía siempre"],"r":1},{"p":"¿Qué se recomienda hacer si el vehículo de escape queda varado en zona de riesgo?","o":["Quedarse dentro esperando indefinidamente","Evaluar rápido una ruta a pie hacia un refugio o punto seguro","Tocar bocina para pedir ayuda","Abandonar todo el equipo en el lugar"],"r":1},{"p":"¿Qué factor hace que una bicicleta sea más difícil de detectar por una horda?","o":["Su tamaño grande","Su bajo nivel de ruido comparado con un motor","Su velocidad máxima","Su necesidad de combustible"],"r":1},{"p":"¿Qué conviene revisar sobre el estado de los neumáticos antes de una salida en vehículo?","o":["No es necesario revisarlos","Que estén en buen estado para evitar quedar varado en zona de riesgo","Solo su color","Su marca comercial"],"r":1},{"p":"¿Qué se recomienda sobre el volumen de la radio o música dentro de un vehículo en zona infestada?","o":["Subirlo al máximo","Mantenerlo bajo o apagado para no atraer atención","No tiene ninguna relación con el ruido exterior","Usarlo como señal para otros grupos siempre"],"r":1},{"p":"¿Qué ventaja aporta dejar el vehículo apuntando hacia la salida durante una parada?","o":["Ninguna en particular","Permite arrancar y escapar más rápido si aparece una amenaza","Ahorra combustible","Facilita el estacionamiento únicamente"],"r":1},{"p":"¿Qué se recomienda sobre viajar de noche en vehículo por zonas desconocidas?","o":["Siempre es más seguro que de día","Se recomienda extremar precauciones por la baja visibilidad","No cambia nada respecto al día","Es obligatorio evitarlo cueste lo que cueste"],"r":1},{"p":"¿Qué rol cumple un mapa físico como respaldo de la ruta de escape en vehículo?","o":["Ninguno si hay GPS","Sirve de respaldo si la tecnología falla","Solo sirve de decoración","Aumenta la posibilidad de perderse"],"r":1},{"p":"¿Qué se recomienda hacer si una ruta de escape aparece bloqueada por una horda?","o":["Avanzar igual entre los infectados","Recurrir a la ruta alternativa planificada de antemano","Detenerse y esperar a que se dispersen sin plan","Abandonar el vehículo de inmediato sin evaluar"],"r":1},{"p":"¿Qué ventaja tiene planificar paradas de descanso en un trayecto largo de escape?","o":["Ninguna, mejor no parar nunca","Permite revisar el vehículo, el estado del grupo y la ruta","Aumenta el riesgo sin ningún beneficio","Solo sirve para perder tiempo"],"r":1},{"p":"¿Qué se recomienda sobre viajar solo o acompañado en una salida en vehículo?","o":["Siempre es mejor ir solo","Viajar acompañado permite cubrirse mutuamente ante imprevistos","No influye en nada la cantidad de personas","Cuantas más personas, menos seguro siempre"],"r":1},{"p":"¿Qué se debe tener en cuenta al elegir entre vehículo motorizado y bicicleta para una salida corta?","o":["Solo la velocidad máxima","El ruido, el combustible disponible y la distancia a recorrer","El color del vehículo","La marca del fabricante"],"r":1},{"p":"¿Qué principio general resume la elección de rutas de escape, según la guía?","o":["Elegir siempre el camino más corto sin evaluar riesgos","Tener alternativas planificadas y evitar cuellos de botella","No planificar nada, improvisar siempre","Usar siempre la misma ruta sin variar"],"r":1},{"p":"¿Es real que un virus pueda reanimar tejido muerto, como en la ficción zombie?","o":["Sí, está comprobado científicamente","No, es un recurso de ficción sin base científica real","Solo ocurre en climas fríos","Solo afecta a animales"],"r":1},{"p":"¿Por qué se aclara que estas guías temáticas son de ficción?","o":["Porque describen hechos históricos reales","Porque se basan en tropos de películas, series y videojuegos, no en hechos reales","Porque son manuales científicos oficiales","Porque fueron escritas por médicos"],"r":1},{"p":"¿Qué relación real existe entre preparación ante desastres y estas guías de fan?","o":["Ninguna, son completamente opuestas","Muchas técnicas de organización y planificación se inspiran en preparación real ante emergencias","La preparación real no sirve de nada aquí","Son idénticas en todo sentido"],"r":1},{"p":"¿Es cierto que en la vida real conviene tener un plan de evacuación familiar?","o":["No, nunca es necesario","Sí, es una práctica recomendada real ante emergencias de todo tipo","Solo sirve para la ficción zombie","Solo lo necesitan los bomberos"],"r":1},{"p":"¿La organización en roles y turnos de un grupo es útil solo en la ficción?","o":["Sí, no tiene aplicación real","No, es una práctica real usada en organización de emergencias y comunidades","Solo sirve en videojuegos","Es inútil en cualquier contexto"],"r":1},{"p":"¿Es verdad que el pánico y la desorganización empeoran cualquier emergencia real?","o":["No, siempre ayudan a resolver la situación","Sí, la calma y la organización mejoran las chances en emergencias reales","Solo importa en la ficción","Es indiferente"],"r":1},{"p":"¿Tener un kit de emergencia real (bug-out bag) es una práctica recomendada fuera de la ficción?","o":["No, es solo un invento de películas","Sí, muchas agencias de defensa civil recomiendan tener un kit básico de emergencia","Solo lo usan los actores","Es ilegal en la mayoría de los países"],"r":1},{"p":"¿Es cierto que hervir agua de fuente dudosa la hace más segura de beber, en la vida real?","o":["No, hervir el agua no cambia nada","Sí, hervirla ayuda a eliminar muchos microorganismos peligrosos","Solo funciona con agua de río","Empeora la calidad del agua"],"r":1},{"p":"¿La planificación de rutas alternativas es útil solo para escenarios ficticios de zombies?","o":["Sí, no tiene otro uso","No, es útil también ante incendios, inundaciones u otras emergencias reales","Solo sirve para perderse menos en un viaje turístico","No tiene relación con la seguridad"],"r":1},{"p":"¿Es real que el estrés prolongado afecta la toma de decisiones de un grupo?","o":["No, no tiene ningún efecto","Sí, el estrés sostenido puede afectar la claridad y la calidad de las decisiones","Solo afecta en la ficción","Mejora siempre la toma de decisiones"],"r":1},{"p":"¿Las 'zonas infestadas' de la ficción tienen un equivalente real en la gestión de desastres?","o":["No, no existe ningún concepto similar","Sí, se asemejan a 'zonas de riesgo' o 'zonas de exclusión' en emergencias reales","Son términos militares exclusivamente","Solo existen en videojuegos"],"r":1},{"p":"¿Es verdad que rotar los turnos de guardia mejora el estado de alerta real de un grupo?","o":["No, da lo mismo no rotar","Sí, evita el agotamiento y mantiene mejor la atención","Solo sirve en la ficción","Empeora el rendimiento"],"r":1},{"p":"¿La idea de 'punto de encuentro' ante una separación es solo un recurso narrativo?","o":["Sí, no se usa fuera de la ficción","No, es una práctica real recomendada en excursiones, escuelas y planes familiares","Solo aplica a grupos militares","No tiene ninguna utilidad práctica"],"r":1},{"p":"¿Es cierto que los alimentos no perecederos son útiles para emergencias reales prolongadas?","o":["No, se pudren igual que los frescos","Sí, se recomiendan justamente por su larga duración","Solo sirven en la ficción zombie","Son más caros y no aportan nada"],"r":1},{"p":"¿El concepto de 'inventario de suministros' tiene aplicación real más allá de la ficción?","o":["No, es exclusivo de juegos y películas","Sí, se usa en gestión de hogares, refugios y ayuda humanitaria real","Solo lo usan las empresas grandes","No aporta ningún beneficio práctico"],"r":1},{"p":"¿Es real que la comunicación en voz baja reduce la detección en escenarios de riesgo?","o":["No, el volumen de voz no importa","Sí, reducir el ruido disminuye las chances de ser detectado en muchos escenarios reales","Solo aplica a la ficción de zombies","Aumenta la posibilidad de ser encontrado"],"r":1},{"p":"¿Aprender primeros auxilios reales tiene utilidad más allá de escenarios ficticios?","o":["No, solo sirve en la ficción","Sí, es una habilidad real y valiosa en cualquier emergencia cotidiana","Solo la necesitan los médicos","Es una pérdida de tiempo"],"r":1},{"p":"¿Es correcto decir que estas guías reemplazan un entrenamiento real de emergencias?","o":["Sí, son exactamente lo mismo","No, son contenido temático de fan y no sustituyen formación oficial en primeros auxilios o emergencias","Son más completas que cualquier curso oficial","No hace falta ningún otro entrenamiento"],"r":1},{"p":"¿Tiene sentido real diversificar el almacenamiento de recursos en distintos lugares?","o":["No, siempre es mejor concentrarlo todo en un solo sitio","Sí, reduce el riesgo de perder todo si un lugar queda inaccesible o dañado","Solo aplica a la ficción","Aumenta el riesgo sin ningún beneficio"],"r":1},{"p":"¿Qué relación hay entre estas guías de fan y la preparación real ante desastres naturales?","o":["Ninguna relación","Comparten varios principios de organización, planificación y calma bajo presión","Son técnicas opuestas entre sí","Solo sirven para entretenimiento sin ninguna base"],"r":1},{"p":"¿Qué efecto suele tener la falta de comunicación clara en un grupo, según la ficción?","o":["Mejora la cohesión","Genera desconfianza y errores de coordinación","No tiene ningún efecto","Aumenta los recursos disponibles"],"r":1},{"p":"¿Qué se recomienda hacer cuando dos miembros del grupo están en desacuerdo sobre una decisión importante?","o":["Ignorar el conflicto","Discutirlo en conjunto y buscar una decisión compartida","Que decida siempre el líder sin escuchar a nadie","Separar al grupo de inmediato"],"r":1},{"p":"¿Qué rol cumple la moral del grupo en su capacidad de supervivencia, según la ficción?","o":["Ninguno, solo importan los recursos físicos","Es un factor clave: una moral baja puede llevar a errores y conflictos","Solo afecta el estado de ánimo, sin consecuencias prácticas","Mejora sola con el tiempo sin necesidad de cuidarla"],"r":1},{"p":"¿Qué se recomienda para sostener la moral del grupo en momentos difíciles?","o":["Ocultar toda la información, buena o mala","Mantener comunicación honesta y momentos de descanso o distracción","Aislar a cada miembro por separado","No hablar nunca de los problemas"],"r":1},{"p":"¿Qué actitud de liderazgo suele generar más confianza en el grupo, según la guía?","o":["Decidir todo en secreto","Consultar decisiones importantes con el resto del grupo","Imponer reglas sin explicación","Cambiar de opinión constantemente sin avisar"],"r":1},{"p":"¿Qué se recomienda hacer si un miembro del grupo pone en riesgo la seguridad de todos repetidamente?","o":["Ignorarlo por completo","Hablarlo abiertamente en el grupo y buscar una solución conjunta","Expulsarlo sin ninguna conversación previa","Premiarlo para evitar el conflicto"],"r":1},{"p":"¿Qué ventaja tiene definir reglas de convivencia desde el principio del grupo?","o":["Ninguna, mejor improvisar todo","Evita conflictos y confusiones más adelante","Genera más discusiones innecesarias","Solo sirve para grupos muy grandes"],"r":1},{"p":"¿Qué se recomienda ante una crisis repentina que exige una decisión rápida?","o":["Discutir durante horas sin actuar","Tener protocolos previos que agilicen la decisión bajo presión","Improvisar sin ningún criterio","Esperar a que decida un desconocido"],"r":1},{"p":"¿Qué relación existe entre el descanso adecuado y la calidad de las decisiones del grupo?","o":["Ninguna relación","El descanso adecuado ayuda a tomar mejores decisiones bajo presión","Dormir menos siempre mejora el rendimiento","Solo afecta el humor, no las decisiones"],"r":1},{"p":"¿Qué se recomienda hacer con los desacuerdos menores dentro del grupo?","o":["Dejar que se acumulen sin hablarlos","Resolverlos a tiempo antes de que crezcan","Ignorarlos siempre","Resolverlos solo con votaciones secretas"],"r":1},{"p":"¿Qué aporta la transparencia sobre el estado real de los recursos del grupo?","o":["Genera pánico innecesario siempre","Permite tomar decisiones informadas entre todos","No aporta nada relevante","Solo debe conocerla el líder"],"r":1},{"p":"¿Qué se recomienda sobre reconocer los aciertos y errores del grupo?","o":["Ignorarlos por completo","Revisarlos en conjunto para mejorar futuras decisiones","Culpar siempre a una sola persona","No hablar nunca de lo que salió mal"],"r":1},{"p":"¿Qué efecto puede tener un liderazgo que nunca escucha al resto del grupo, según la ficción?","o":["Mejora la eficiencia siempre","Puede generar resentimiento y errores por falta de perspectivas distintas","No tiene ningún efecto negativo","Aumenta automáticamente la moral"],"r":1},{"p":"¿Qué se recomienda priorizar al asignar tareas según las habilidades de cada miembro?","o":["Asignar tareas al azar sin considerar habilidades","Aprovechar las fortalezas de cada persona para las tareas más adecuadas","Que todos hagan exactamente lo mismo siempre","Ignorar las habilidades individuales"],"r":1},{"p":"¿Qué rol cumple la empatía dentro de la dinámica de un grupo en crisis?","o":["Ninguno, solo es señal de debilidad","Ayuda a sostener la cohesión y a resolver conflictos con menos daño","Empeora siempre la organización del grupo","Solo sirve en situaciones sin riesgo"],"r":1},{"p":"¿Qué se recomienda si el grupo enfrenta una pérdida importante, como la muerte de un miembro?","o":["Seguir como si nada hubiera pasado","Darse un espacio para procesarlo antes de retomar la rutina","Culpar de inmediato a alguien del grupo","Separar al grupo permanentemente"],"r":1},{"p":"¿Qué ventaja da tener un plan claro de sucesión de liderazgo si el líder queda incapacitado?","o":["Ninguna, no hace falta planificarlo","Evita el caos y permite que el grupo siga funcionando con orden","Genera más conflictos siempre","Solo importa en grupos militares"],"r":1},{"p":"¿Qué se recomienda respecto a incluir a nuevos sobrevivientes en el grupo?","o":["Rechazarlos siempre sin evaluar","Evaluar la situación con cautela y decidirlo en conjunto","Aceptar a cualquiera sin ninguna precaución","Ignorarlos completamente"],"r":1},{"p":"¿Qué se recomienda sobre expresar el miedo o el cansancio dentro del grupo?","o":["Ocultarlo siempre para parecer fuerte","Poder expresarlo con confianza ayuda a sostener la salud emocional del grupo","Es señal de debilidad que debe castigarse","No tiene ningún efecto en la dinámica grupal"],"r":1},{"p":"¿Qué principio general resume una buena toma de decisiones grupales en la ficción de supervivencia?","o":["Decidir solo, rápido y sin consultar nunca","Combinar información compartida, calma y participación de todos","Ignorar siempre la opinión de la mayoría","Evitar cualquier tipo de decisión mientras se pueda"],"r":1}];
+
+const ZOMBIE_TEST_STORAGE_KEY = 'survivalAI_zombieTest_v1';
+let zombieTestState = null; // intento en curso
+let zombieTestHistory = []; // historial de intentos pasados
+
+function cargarZombieTest(){
+  const guardado = leerStorage(ZOMBIE_TEST_STORAGE_KEY);
+  if(guardado && Array.isArray(guardado.history)) zombieTestHistory = guardado.history;
+}
+
+function guardarZombieTestHistory(){
+  guardarStorage(ZOMBIE_TEST_STORAGE_KEY, { history: zombieTestHistory });
+}
+
+function mezclarArray(arr){
+  const copia = arr.slice();
+  for(let i = copia.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    const tmp = copia[i]; copia[i] = copia[j]; copia[j] = tmp;
+  }
+  return copia;
+}
+
+function iniciarZombieTest(){
+  const preguntasElegidas = mezclarArray(ZOMBIE_QUESTIONS).slice(0, 20);
+  const preguntas = preguntasElegidas.map(q => {
+    const opcionesConIndice = q.o.map((texto, i) => ({ texto, esCorrecta: i === q.r }));
+    const opcionesMezcladas = mezclarArray(opcionesConIndice);
+    return {
+      pregunta: q.p,
+      opciones: opcionesMezcladas.map(o => o.texto),
+      indiceCorrecto: opcionesMezcladas.findIndex(o => o.esCorrecta)
+    };
+  });
+  zombieTestState = {
+    preguntas,
+    indiceActual: 0,
+    respuestas: [],
+    respondiendo: true
+  };
+  renderZombieTestSection();
+}
+
+function responderZombieTest(idxOpcion){
+  if(!zombieTestState || !zombieTestState.respondiendo) return;
+  zombieTestState.respondiendo = false;
+  const preguntaActual = zombieTestState.preguntas[zombieTestState.indiceActual];
+  const correcta = idxOpcion === preguntaActual.indiceCorrecto;
+  zombieTestState.respuestas.push(correcta);
+  zombieTestState.ultimaSeleccion = idxOpcion;
+  renderZombieTestSection();
+}
+
+function siguienteZombiePregunta(){
+  if(!zombieTestState) return;
+  zombieTestState.indiceActual++;
+  zombieTestState.respondiendo = true;
+  zombieTestState.ultimaSeleccion = null;
+  if(zombieTestState.indiceActual >= zombieTestState.preguntas.length){
+    finalizarZombieTest();
+    return;
+  }
+  renderZombieTestSection();
+}
+
+const ZOMBIE_RESULT_BANDS = [
+  { min: 0,  max: 4,  clase: 'bad', titulo: 'No pasaste la primera noche', dias: [0, 1],
+    frases: [
+      'Tu grupo no llego a organizar ni la primera guardia: la horda encontro la puerta sin barricada.',
+      'Saliste a buscar suministros sin plan y no volviste a tiempo para el toque de queda del refugio.',
+      'Confundiste el protocolo de mordedura con una sugerencia, y eso definio todo muy rapido.'
+    ] },
+  { min: 5,  max: 9,  clase: 'bad', titulo: 'Sobreviviste apenas unos dias', dias: [2, 6],
+    frases: [
+      'Aguantaste algunas salidas, pero una ruta de escape mal planificada termino por complicar todo.',
+      'El refugio resistio un par de noches hasta que el desgaste silencioso de las barricadas hizo lo suyo.',
+      'El grupo se mantuvo unido poco tiempo: la falta de reglas claras genero un problema evitable.'
+    ] },
+  { min: 10, max: 13, clase: 'mid', titulo: 'Aguantaste algunas semanas', dias: [10, 25],
+    frases: [
+      'Con lo basico bien resuelto, tu grupo sostuvo el refugio varias semanas antes del primer gran susto.',
+      'Las salidas de recoleccion funcionaron casi siempre, aunque el sigilo todavia necesitaba trabajo.',
+      'La organizacion del grupo evito lo peor, pero algunos detalles de preparacion se pagaron caro.'
+    ] },
+  { min: 14, max: 16, clase: 'mid', titulo: 'Sobreviviste varios meses', dias: [40, 90],
+    frases: [
+      'Tu refugio se volvio un punto fijo confiable: buena vigilancia, buenas rutas, pocos sustos grandes.',
+      'El grupo aprendio rapido de sus errores y eso alcanzo para pasar varios meses sin bajas graves.',
+      'Tu manejo de recursos e infeccion mantuvo al grupo estable durante una buena temporada.'
+    ] },
+  { min: 17, max: 19, clase: 'good', titulo: 'Sobreviviste al primer año', dias: [200, 360],
+    frases: [
+      'Refugio defendible, rutas dobles, protocolo de mordedura al pie de la letra: tu grupo se gano el año.',
+      'Casi todo salio segun lo planeado, con margen incluso para ayudar a otro grupo en el camino.',
+      'La combinacion de sigilo, liderazgo compartido y buena logistica te sostuvo mucho mas que a la mayoria.'
+    ] },
+  { min: 20, max: 20, clase: 'good', titulo: 'Sos leyenda del apocalipsis', dias: [500, 1500],
+    frases: [
+      'Puntaje perfecto: refugio, sigilo, grupo y preparacion resueltos como en el mejor manual del genero.',
+      'Tu grupo se convierte en el que otros sobrevivientes cuentan como leyenda, años despues del brote inicial.',
+      'Ni la ficcion mas exigente te complica: dominas cada capitulo del manual zombie.'
+    ] }
+];
+
+function calcularResultadoZombieTest(puntaje){
+  const banda = ZOMBIE_RESULT_BANDS.find(b => puntaje >= b.min && puntaje <= b.max) || ZOMBIE_RESULT_BANDS[0];
+  const frase = banda.frases[Math.floor(Math.random() * banda.frases.length)];
+  const dias = Math.floor(banda.dias[0] + Math.random() * (banda.dias[1] - banda.dias[0]));
+  return { clase: banda.clase, titulo: banda.titulo, frase, dias };
+}
+
+function finalizarZombieTest(){
+  const puntaje = zombieTestState.respuestas.filter(Boolean).length;
+  const resultado = calcularResultadoZombieTest(puntaje);
+  zombieTestState.finalizado = true;
+  zombieTestState.resultado = resultado;
+  zombieTestState.puntaje = puntaje;
+  zombieTestHistory.unshift({ puntaje, dias: resultado.dias, clase: resultado.clase, fecha: new Date().toISOString() });
+  zombieTestHistory = zombieTestHistory.slice(0, 8);
+  guardarZombieTestHistory();
+  renderZombieTestSection();
+}
+
+function reiniciarZombieTest(){
+  zombieTestState = null;
+  renderZombieTestSection();
+}
+
+function formatearFechaZombie(iso){
+  try{
+    const d = new Date(iso);
+    return d.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  }catch(e){ return ''; }
+}
+
+function renderZombieTestSection(){
+  document.getElementById('sectionEyebrow').textContent = 'MODULO 27 - TEST ZOMBIE';
+  document.getElementById('sectionTitle').textContent = 'Test de supervivencia zombie';
+  document.getElementById('sectionDesc').textContent = 'Respondé 20 preguntas al azar sobre el manual zombie y descubrí cuánto tiempo (ficticio) sobrevivirías.';
+  document.getElementById('toolbar').style.display = 'none';
+
+  const content = document.getElementById('content');
+
+  if(!zombieTestState){
+    content.innerHTML = `
+      <div class="quiz-intro-card">
+        <p>200 preguntas sobre refugio, sigilo, grupo, preparacion, armas improvisadas y mas, todas basadas en los modulos tematicos de este manual. Cada intento elige 20 preguntas al azar y las mezcla, asi que casi nunca te va a tocar el mismo test dos veces.</p>
+        <div class="quiz-intro-stats">
+          <div><b>${ZOMBIE_QUESTIONS.length}</b>preguntas en el banco</div>
+          <div><b>20</b>por intento</div>
+          <div><b>${zombieTestHistory.length}</b>intentos guardados</div>
+        </div>
+        <button class="btn" id="zombieTestStartBtn">Empezar test</button>
+        ${zombieTestHistory.length ? `
+          <div class="quiz-history">
+            <h4>Ultimos intentos</h4>
+            ${zombieTestHistory.map(h => `
+              <div class="quiz-history-item">
+                <span>${formatearFechaZombie(h.fecha)}</span>
+                <span>${h.puntaje}/20</span>
+                <span>${h.dias} dias de supervivencia</span>
+              </div>`).join('')}
+          </div>` : ''}
+      </div>`;
+    document.getElementById('zombieTestStartBtn').addEventListener('click', iniciarZombieTest);
+    return;
+  }
+
+  if(zombieTestState.finalizado){
+    const r = zombieTestState.resultado;
+    content.innerHTML = `
+      <div class="quiz-panel">
+        <div class="quiz-result ${r.clase}">
+          <p class="quiz-score">${zombieTestState.puntaje}/20</p>
+          <h3>${escapeHtml(r.titulo)}</h3>
+          <p>${escapeHtml(r.frase)} Tiempo estimado de supervivencia (ficticio): <strong>${r.dias} dia${r.dias === 1 ? '' : 's'}</strong>.</p>
+          <div class="quiz-result-actions">
+            <button class="btn" id="zombieTestRetryBtn">Hacer otro test</button>
+          </div>
+        </div>
+      </div>`;
+    document.getElementById('zombieTestRetryBtn').addEventListener('click', reiniciarZombieTest);
+    return;
+  }
+
+  const idx = zombieTestState.indiceActual;
+  const total = zombieTestState.preguntas.length;
+  const pregunta = zombieTestState.preguntas[idx];
+  const puntajeParcial = zombieTestState.respuestas.filter(Boolean).length;
+
+  content.innerHTML = `
+    <div class="quiz-panel">
+      <div class="quiz-meta"><span>Pregunta ${idx + 1} / ${total}</span><span>Correctas: ${puntajeParcial}</span></div>
+      <div class="quiz-progress-bar"><div class="quiz-progress-fill" style="width:${(idx / total) * 100}%"></div></div>
+      <p class="quiz-question">${escapeHtml(pregunta.pregunta)}</p>
+      <div class="quiz-options">
+        ${pregunta.opciones.map((op, i) => `<button class="quiz-option-btn" data-idx="${i}">${escapeHtml(op)}</button>`).join('')}
+      </div>
+      <div class="quiz-next-row" id="zombieTestNextRow"></div>
+    </div>`;
+
+  if(zombieTestState.respondiendo){
+    content.querySelectorAll('.quiz-option-btn').forEach(btn => {
+      btn.addEventListener('click', () => responderZombieTest(Number(btn.dataset.idx)));
+    });
+  } else {
+    const seleccion = zombieTestState.ultimaSeleccion;
+    content.querySelectorAll('.quiz-option-btn').forEach((btn, i) => {
+      btn.disabled = true;
+      if(i === pregunta.indiceCorrecto) btn.classList.add('correct');
+      else if(i === seleccion) btn.classList.add('incorrect');
+    });
+    const nextRow = document.getElementById('zombieTestNextRow');
+    const esUltima = idx === total - 1;
+    nextRow.innerHTML = `<button class="btn" id="zombieTestNextBtn">${esUltima ? 'Ver resultado' : 'Siguiente pregunta'}</button>`;
+    document.getElementById('zombieTestNextBtn').addEventListener('click', siguienteZombiePregunta);
+  }
 }
 
 /* ---------- SISTEMA DE NIVELES, XP Y LOGROS ---------- */
@@ -5483,7 +6177,7 @@ function borrarTodosLosDatos(){
 /* ---------- DESAFÍOS REALES ---------- */
 
 function renderDesafiosSection(){
-  document.getElementById('sectionEyebrow').textContent = 'MÓDULO 18 — PRÁCTICA';
+  document.getElementById('sectionEyebrow').textContent = 'MÓDULO 23 — PRÁCTICA';
   document.getElementById('sectionTitle').textContent = 'Desafíos';
   document.getElementById('sectionDesc').textContent = 'Llevá lo aprendido a la práctica. Completá la actividad, subí una foto como evidencia y ganá XP e insignias.';
   document.getElementById('toolbar').style.display = 'none';
@@ -5572,7 +6266,7 @@ function renderDesafioCard(c){
 }
 
 function renderEstadisticasSection(){
-  document.getElementById('sectionEyebrow').textContent = 'MÓDULO 20 — PROGRESO';
+  document.getElementById('sectionEyebrow').textContent = 'MÓDULO 25 — PROGRESO';
   document.getElementById('sectionTitle').textContent = 'Estadísticas';
   document.getElementById('sectionDesc').textContent = 'Tu nivel, experiencia y logros acumulados usando el manual.';
   document.getElementById('toolbar').style.display = 'none';
@@ -5762,7 +6456,7 @@ function calcularEspecialidad(){
 }
 
 function renderPerfilSection(){
-  document.getElementById('sectionEyebrow').textContent = 'MÓDULO 19 — PERFIL';
+  document.getElementById('sectionEyebrow').textContent = 'MÓDULO 24 — PERFIL';
   document.getElementById('sectionTitle').textContent = 'Perfil del superviviente';
   document.getElementById('sectionDesc').textContent = 'Tu ficha de superviviente: nivel, rango, racha y especialidad, calculados a partir de tu actividad real en el manual.';
   document.getElementById('toolbar').style.display = 'none';
@@ -6038,6 +6732,8 @@ function render(){
     renderPerfilSection();
   } else if(currentSection === 'estadisticas'){
     renderEstadisticasSection();
+  } else if(currentSection === 'zombie_test'){
+    renderZombieTestSection();
   } else {
     renderGenericSection(currentSection);
     trackModuloVisitado(currentSection);
@@ -6104,7 +6800,7 @@ const WELCOME_STORAGE_KEY = 'survivalai_welcome_seen';
 
 /* ---------- ACERCA DEL DESARROLLADOR ---------- */
 // ✏️ Editá esta constante cuando publiques una nueva versión de la app
-const APP_VERSION = '1.0.0';
+const APP_VERSION = '1.2.0';
 
 function openAboutDev(){
   const overlay = document.getElementById('aboutDevOverlay');
@@ -6170,6 +6866,7 @@ function init(){
   cargarGpsWaypoints();
   cargarPerfil();
   cargarExpedicion();
+  cargarZombieTest();
   const initial = location.hash.replace('#', '');
   if(SECTION_KEYS.includes(initial)) currentSection = initial;
   render();
